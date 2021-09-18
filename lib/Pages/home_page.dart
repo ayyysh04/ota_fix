@@ -1,6 +1,9 @@
+import 'package:carousel_slider/carousel_controller.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ota_fix/core/store.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -32,27 +35,40 @@ class _HomePageState extends State<HomePage> {
     // VxState.watch(context, on: [OnItemTapped]);
     return Scaffold(
       body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Flex(
+          direction: Axis.vertical,
+          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                "OTA Fix".text.xl5.color(Vx.black).bold.make(),
-                _uppperCardWidgets(),
-              ],
+            Expanded(
+              flex: 5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  "OTA Fix"
+                      .text
+                      .xl5
+                      .color(Vx.black)
+                      .fontFamily(GoogleFonts.lato().fontFamily!)
+                      .bold
+                      .make(),
+                  _uppperCardWidgets(),
+                ],
+              ),
             ),
-            Column(
-              children: [
-                "Rooms".text.xl2.bold.make(),
-                5.heightBox,
-                _roomGridBuilder(context),
-                Divider(
-                  thickness: 2,
-                  height: 0,
-                )
-              ],
+            Expanded(
+              flex: 3,
+              child: Column(
+                children: [
+                  "Rooms".text.xl2.bold.make(),
+                  5.heightBox,
+                  RoomSliderWidget(),
+                ],
+              ),
             ),
+            Divider(
+              thickness: 2,
+              height: 0,
+            )
           ],
         ),
       ).pOnly(top: 20, left: 15, right: 15, bottom: 0),
@@ -84,39 +100,6 @@ class _HomePageState extends State<HomePage> {
             label: "User profile",
           ),
         ],
-      ),
-    );
-  }
-
-  Container _roomGridBuilder(BuildContext context) {
-    return Container(
-      height: 160,
-      child: GridView.builder(
-        physics: BouncingScrollPhysics(),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        itemCount: 4,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount:
-              MediaQuery.of(context).orientation == Orientation.landscape
-                  ? 3
-                  : 2,
-          crossAxisSpacing: 20,
-          mainAxisSpacing: 20,
-          childAspectRatio: (3 / 1),
-        ),
-        itemBuilder: (
-          context,
-          index,
-        ) {
-          return Container(
-            decoration: BoxDecoration(
-                border: Border.all(),
-                borderRadius: BorderRadius.all(Radius.circular(10))),
-            child: ElevatedButton(
-                onPressed: () {},
-                child: "Room ${index + 1}".text.xl.bold.make()),
-          );
-        },
       ),
     );
   }
@@ -204,6 +187,80 @@ class _HomePageState extends State<HomePage> {
           ],
         )
       ],
+    );
+  }
+}
+
+class RoomSliderWidget extends StatefulWidget {
+  @override
+  State<RoomSliderWidget> createState() => _RoomSliderWidgetState();
+}
+
+class _RoomSliderWidgetState extends State<RoomSliderWidget> {
+  int _currentSliderIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return CarouselSlider.builder(
+      options: CarouselOptions(
+        // height: 200.0,
+
+        autoPlay: false,
+        autoPlayInterval: Duration(seconds: 3),
+        autoPlayAnimationDuration: Duration(milliseconds: 800),
+        autoPlayCurve: Curves.fastOutSlowIn,
+        pauseAutoPlayOnTouch: true,
+        // aspectRatio: 2 / 1.2,
+        onPageChanged: (index, reason) {
+          setState(() {
+            _currentSliderIndex = index;
+          });
+        },
+      ),
+      itemBuilder: (BuildContext context, int index, int realIndex) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+          width: MediaQuery.of(context).size.width,
+          child: Card(
+            clipBehavior: Clip.antiAlias,
+            // margin: EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(15))),
+            color: Vx.amber100,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    stops: [
+                      0.2,
+                      1
+                    ],
+                    colors: [
+                      Vx.blue400,
+                      Vx.white,
+                    ]),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text("Data",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.bold)),
+                  Text("Data",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17.0,
+                          fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      itemCount: 2,
     );
   }
 }
