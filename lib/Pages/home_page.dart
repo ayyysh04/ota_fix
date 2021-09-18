@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
           // mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              flex: 5,
+              flex: 6,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Expanded(
-              flex: 3,
+              flex: 4,
               child: Column(
                 children: [
                   "Rooms".text.xl2.bold.make(),
@@ -198,69 +198,115 @@ class RoomSliderWidget extends StatefulWidget {
 
 class _RoomSliderWidgetState extends State<RoomSliderWidget> {
   int _currentSliderIndex = 0;
+  List cardList = [Item1(), Item1()];
+
+  List<T> map<T>(List list, Function handler) {
+    List<T> result = [];
+    for (var i = 0; i < list.length; i++) {
+      result.add(handler(i, list[i]));
+    }
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return CarouselSlider.builder(
-      options: CarouselOptions(
-        // height: 200.0,
-
-        autoPlay: false,
-        autoPlayInterval: Duration(seconds: 3),
-        autoPlayAnimationDuration: Duration(milliseconds: 800),
-        autoPlayCurve: Curves.fastOutSlowIn,
-        pauseAutoPlayOnTouch: true,
-        // aspectRatio: 2 / 1.2,
-        onPageChanged: (index, reason) {
-          setState(() {
-            _currentSliderIndex = index;
-          });
-        },
-      ),
-      itemBuilder: (BuildContext context, int index, int realIndex) {
-        return Container(
-          padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-          width: MediaQuery.of(context).size.width,
-          child: Card(
-            clipBehavior: Clip.antiAlias,
-            // margin: EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            color: Vx.amber100,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    stops: [
-                      0.2,
-                      1
-                    ],
-                    colors: [
-                      Vx.blue400,
-                      Vx.white,
-                    ]),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text("Data",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22.0,
-                          fontWeight: FontWeight.bold)),
-                  Text("Data",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17.0,
-                          fontWeight: FontWeight.w600)),
-                ],
-              ),
+    return Column(
+        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CarouselSlider(
+            options: CarouselOptions(
+              enableInfiniteScroll: true,
+              // height: 200.0,
+              // autoPlay: true,
+              // autoPlayInterval: Duration(seconds: 3),
+              // autoPlayAnimationDuration: Duration(milliseconds: 800),
+              // autoPlayCurve: Curves.fastOutSlowIn,
+              pauseAutoPlayOnTouch: true,
+              // aspectRatio: 2.0,
+              onPageChanged: (index, reason) {
+                setState(() {
+                  _currentSliderIndex = index;
+                });
+              },
             ),
+            items: cardList.map((card) {
+              return Builder(builder: (BuildContext context) {
+                return Container(
+                  padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+                  // height: MediaQuery.of(context).size.height * 0.30,
+                  width: MediaQuery.of(context).size.width,
+                  child: GestureDetector(
+                    onTap: () {
+                      print("item clicked");
+                    },
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      // color: Colors.blueAccent,
+                      child: card,
+                    ),
+                  ),
+                );
+              });
+            }).toList(),
           ),
-        );
-      },
-      itemCount: 2,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: map<Widget>(cardList, (index, url) {
+              return Container(
+                width: 10.0,
+                height: 10.0,
+                margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentSliderIndex == index
+                      ? Colors.blueAccent
+                      : Colors.grey,
+                ),
+              );
+            }),
+          ),
+        ]);
+  }
+}
+
+class Item1 extends StatelessWidget {
+  const Item1({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: [
+              0.3,
+              1
+            ],
+            colors: [
+              Vx.blue400,
+              Colors.white,
+            ]),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text("Data",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.bold)),
+          Text("Data",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17.0,
+                  fontWeight: FontWeight.w600)),
+        ],
+      ),
     );
   }
 }
