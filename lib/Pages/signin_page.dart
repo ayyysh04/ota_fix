@@ -13,10 +13,6 @@ class SigninPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(child: HomePage()
-        // SwitchesPage(
-        //   roomName: "BedRoom",
-        // )
-        );
+    return SafeArea(child: HomePage());
   }
 }

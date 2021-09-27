@@ -1,10 +1,10 @@
-import 'package:carousel_slider/carousel_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/Pages/switches_page.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class HomePage extends StatefulWidget {
@@ -37,33 +37,54 @@ class _HomePageState extends State<HomePage> {
       body: Container(
         child: Flex(
           direction: Axis.vertical,
-          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              flex: 6,
+            Flexible //Flexible and expandable are almost same
+                (
+              fit: FlexFit.tight,
+              flex: 4,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  "OTA Fix"
-                      .text
-                      .xl5
-                      .color(Vx.black)
-                      .fontFamily(GoogleFonts.lato().fontFamily!)
-                      .bold
-                      .make(),
-                  _uppperCardWidgets(),
+                  Row(
+                    children: [
+                      Container(
+                          child: Image.asset(
+                        "assets/images/logo.png",
+                        fit: BoxFit.cover,
+                      )).wh(100, 70),
+                      "OTA Fix"
+                          .text
+                          .xl5
+                          .color(Vx.black)
+                          .fontFamily(GoogleFonts.varelaRound().fontFamily!)
+                          .bold
+                          .blue500
+                          .make(),
+                    ],
+                  ),
+                  _upperIconsWidget(),
+                  // _uppperCardWidgets(),
                 ],
               ),
             ),
-            Expanded(
-              flex: 4,
-              child: Column(
-                children: [
-                  "Rooms".text.xl2.bold.make(),
-                  5.heightBox,
-                  RoomSliderWidget(),
-                ],
-              ),
+            Flexible(
+              fit: FlexFit.tight,
+              flex: 3,
+              child: LayoutBuilder(builder: (context, constraints) {
+                print(constraints.maxHeight);
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    "Rooms".text.xl2.bold.make(),
+                    5.heightBox,
+                    RoomSliderWidget(
+                      constraints: constraints,
+                    ),
+                  ],
+                );
+              }),
             ),
             Divider(
               thickness: 2,
@@ -189,14 +210,141 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+
+  _upperIconsWidget() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Vx.blue600, width: 3),
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+      ),
+      child: Container(
+          child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                  flex: 5,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border(
+                      bottom: BorderSide(
+                        color: Vx.blue600,
+                        width: 3.0,
+                      ),
+                      right: BorderSide(
+                        color: Vx.blue600,
+                        width: 3.0,
+                      ),
+                    )),
+                    child: Column(
+                      children: [
+                        Image.asset(
+                          "assets/icons/humidity.png",
+                          color: Vx.blue600,
+                          height: 100,
+                        ),
+                        Column(
+                          children: [
+                            "Humidity".text.xl.bold.make(),
+                            "$humPer %".text.xl.bold.make(),
+                          ],
+                        )
+                      ],
+                    ),
+                  )),
+              Expanded(
+                flex: 5,
+                child: Container(
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        "assets/icons/power.png",
+                        height: 100,
+                      ),
+                      "Power Usage".text.xl.bold.make(),
+                      "$powerUsage kW".text.xl.bold.make(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                flex: 5,
+                child: Container(
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        "assets/icons/temprature.png",
+                        height: 100,
+                      ),
+                      "Temperature".text.xl.bold.make(),
+                      "$temp O".text.xl.bold.make(),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 5,
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border(
+                    left: BorderSide(
+                      color: Vx.blue600,
+                      width: 3.0,
+                    ),
+                    top: BorderSide(
+                      color: Vx.blue600,
+                      width: 3.0,
+                    ),
+                  )),
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        "assets/icons/humidity.png",
+                        height: 100,
+                      ),
+                      "Device connected".text.xl.bold.make(),
+                      "4".text.xl.bold.make(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
+      ))
+      // .pOnly(left: 10, right: 10, top: 0, bottom: 10)
+      ,
+    );
+  }
 }
 
 class RoomSliderWidget extends StatefulWidget {
+  BoxConstraints constraints;
+  RoomSliderWidget({
+    Key? key,
+    required this.constraints,
+  }) : super(key: key);
+
   @override
   State<RoomSliderWidget> createState() => _RoomSliderWidgetState();
 }
 
 class _RoomSliderWidgetState extends State<RoomSliderWidget> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  int items = 3;
   int _currentSliderIndex = 0;
   List cardList = [Item1(), Item1()];
 
@@ -210,64 +358,123 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          CarouselSlider(
-            options: CarouselOptions(
-              enableInfiniteScroll: true,
-              // height: 200.0,
-              // autoPlay: true,
-              // autoPlayInterval: Duration(seconds: 3),
-              // autoPlayAnimationDuration: Duration(milliseconds: 800),
-              // autoPlayCurve: Curves.fastOutSlowIn,
-              pauseAutoPlayOnTouch: true,
-              // aspectRatio: 2.0,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  _currentSliderIndex = index;
-                });
-              },
-            ),
-            items: cardList.map((card) {
-              return Builder(builder: (BuildContext context) {
-                return Container(
-                  padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
-                  // height: MediaQuery.of(context).size.height * 0.30,
-                  width: MediaQuery.of(context).size.width,
-                  child: GestureDetector(
-                    onTap: () {
-                      print("item clicked");
-                    },
-                    child: Card(
-                      clipBehavior: Clip.antiAlias,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(20))),
-                      // color: Colors.blueAccent,
-                      child: card,
+    return Container(
+      child: Column(
+          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+          children: [
+            CarouselSlider.builder(
+                itemCount: items,
+                itemBuilder: (BuildContext context, _, __) {
+                  return Container(
+                    padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+                    // height: MediaQuery.of(context).size.height * 0.30,
+                    width: MediaQuery.of(context).size.width,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    SwitchesPage(roomName: "My Room")));
+                      },
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20))),
+                        // color: Colors.blueAccent,
+                        child: Item1(),
+                      ),
                     ),
-                  ),
-                );
-              });
-            }).toList(),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: map<Widget>(cardList, (index, url) {
-              return Container(
-                width: 10.0,
-                height: 10.0,
-                margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _currentSliderIndex == index
-                      ? Colors.blueAccent
-                      : Colors.grey,
+                  );
+                },
+                options: CarouselOptions(
+                    // aspectRatio: 16 / 10,
+                    height: widget.constraints.maxHeight - 70,
+                    enableInfiniteScroll: true,
+                    pauseAutoPlayOnTouch: true,
+                    // aspectRatio: 2.0,
+                    onPageChanged: (index, reason) {
+                      setState(
+                        () {
+                          _currentSliderIndex = index;
+                        },
+                      );
+                    })),
+            // CarouselSlider(
+            //   options: CarouselOptions(
+            //     enableInfiniteScroll: true,
+            //     // height: 170.0, //make it acc to device size
+            //     // autoPlay: true,
+            //     // autoPlayInterval: Duration(seconds: 3),
+            //     // autoPlayAnimationDuration: Duration(milliseconds: 800),
+            //     // autoPlayCurve: Curves.fastOutSlowIn,
+            //     pauseAutoPlayOnTouch: true,
+            //     // aspectRatio: 2.0,
+            //     onPageChanged: (index, reason) {
+            //       setState(() {
+            //         _currentSliderIndex = index;
+            //       });
+            //     },
+            //   ),
+            //   items: cardList.map((card) {
+            //     return Builder(builder: (BuildContext context) {
+            //       return Container(
+            //         padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+            //         // height: MediaQuery.of(context).size.height * 0.30,
+            //         width: MediaQuery.of(context).size.width,
+            //         child: GestureDetector(
+            //           onTap: () {
+            //             print("item clicked");
+            //           },
+            //           child: Card(
+            //             clipBehavior: Clip.antiAlias,
+            //             shape: RoundedRectangleBorder(
+            //                 borderRadius:
+            //                     BorderRadius.all(Radius.circular(20))),
+            //             // color: Colors.blueAccent,
+            //             child: card,
+            //           ),
+            //         ),
+            //       );
+            //     });
+            //   }).toList(),
+            // ),
+
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List<Widget>.generate(
+                    items,
+                    (index) => Container(
+                          width: 10.0,
+                          height: 10.0,
+                          margin: EdgeInsets.symmetric(
+                              vertical: 10.0, horizontal: 2.0),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentSliderIndex == index
+                                ? Colors.blueAccent
+                                : Colors.grey,
+                          ),
+                        ))
+
+                // map<Widget>(cardList, (index, url) {
+                //   return Container(
+                //     width: 10.0,
+                //     height: 10.0,
+                //     margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                //     decoration: BoxDecoration(
+                //       shape: BoxShape.circle,
+                //       color: _currentSliderIndex == index
+                //           ? Colors.blueAccent
+                //           : Colors.grey,
+                //     ),
+                //   );
+                // }),
                 ),
-              );
-            }),
-          ),
-        ]);
+          ]),
+    );
   }
 }
 
