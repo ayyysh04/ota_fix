@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ota_fix/Pages/power_usage_page.dart';
+import 'package:ota_fix/Pages/profile_page.dart';
 import 'package:ota_fix/Pages/switches_page.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -15,7 +17,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  late PageController pageController;
+  int _currentPage = 0;
+  @override
+  void initState() {
+    super.initState();
+    pageController = PageController(initialPage: 0);
+  }
 
   double temp = 23.5;
 
@@ -25,7 +33,9 @@ class _HomePageState extends State<HomePage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _currentPage = index;
+      pageController.animateToPage(index,
+          duration: Duration(milliseconds: 500), curve: Curves.ease);
     });
   }
 
@@ -34,67 +44,19 @@ class _HomePageState extends State<HomePage> {
     // int? _selectedIndex = (VxState.store as Mystore).selectedIndex;
     // VxState.watch(context, on: [OnItemTapped]);
     return Scaffold(
-      body: Container(
-        child: Flex(
-          direction: Axis.vertical,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible //Flexible and expandable are almost same
-                (
-              fit: FlexFit.tight,
-              flex: 4,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                          child: Image.asset(
-                        "assets/images/logo.png",
-                        fit: BoxFit.cover,
-                      )).wh(100, 70),
-                      "OTA Fix"
-                          .text
-                          .xl5
-                          .color(Vx.black)
-                          .fontFamily(GoogleFonts.varelaRound().fontFamily!)
-                          .bold
-                          .blue500
-                          .make(),
-                    ],
-                  ),
-                  _upperIconsWidget(),
-                  // _uppperCardWidgets(),
-                ],
-              ),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              flex: 3,
-              child: LayoutBuilder(builder: (context, constraints) {
-                print(constraints.maxHeight);
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    "Rooms".text.xl2.bold.make(),
-                    5.heightBox,
-                    RoomSliderWidget(
-                      constraints: constraints,
-                    ),
-                  ],
-                );
-              }),
-            ),
-            Divider(
-              thickness: 2,
-              height: 0,
-            )
-          ],
-        ),
-      ).pOnly(top: 20, left: 15, right: 15, bottom: 0),
+      body: PageView(
+        physics: BouncingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        controller: pageController,
+        onPageChanged: (value) {
+          setState(() {
+            _currentPage = value;
+          });
+        },
+        children: [_homepage(), powerUsagePage(), ProfilePage()],
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
+        currentIndex: _currentPage,
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
         showSelectedLabels: false,
@@ -123,6 +85,67 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Widget _homepage() {
+    return Container(
+      child: Flex(
+        direction: Axis.vertical,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible //Flexible and expandable are almost same
+              (
+            fit: FlexFit.tight,
+            flex: 4,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                        child: Image.asset(
+                      "assets/images/logo.png",
+                      fit: BoxFit.cover,
+                    )).wh(100, 70),
+                    "OTA Fix"
+                        .text
+                        .xl5
+                        .color(Vx.black)
+                        .fontFamily(GoogleFonts.varelaRound().fontFamily!)
+                        .bold
+                        .blue500
+                        .make(),
+                  ],
+                ),
+                _upperIconsWidget(),
+                // _uppperCardWidgets(),
+              ],
+            ),
+          ),
+          Flexible(
+            fit: FlexFit.tight,
+            flex: 3,
+            child: LayoutBuilder(builder: (context, constraints) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  "Rooms".text.xl2.bold.make(),
+                  5.heightBox,
+                  RoomSliderWidget(
+                    constraints: constraints,
+                  ),
+                ],
+              );
+            }),
+          ),
+          Divider(
+            thickness: 2,
+            height: 0,
+          )
+        ],
+      ),
+    ).pOnly(top: 20, left: 15, right: 15, bottom: 0);
   }
 
   _uppperCardWidgets() {
@@ -459,18 +482,18 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
                           ),
                         ))
 
-                // map<Widget>(cardList, (index, url) {
-                //   return Container(
-                //     width: 10.0,
-                //     height: 10.0,
-                //     margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                //     decoration: BoxDecoration(
-                //       shape: BoxShape.circle,
-                //       color: _currentSliderIndex == index
-                //           ? Colors.blueAccent
-                //           : Colors.grey,
-                //     ),
-                //   );
+                //   map<Widget>(cardList, (index, url) {
+                // return Container(
+                //   width: 10.0,
+                //   height: 10.0,
+                //   margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                //   decoration: BoxDecoration(
+                //     shape: BoxShape.circle,
+                //     color: _currentSliderIndex == index
+                //         ? Colors.blueAccent
+                //         : Colors.grey,
+                //   ),
+                // );
                 // }),
                 ),
           ]),

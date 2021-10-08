@@ -46,7 +46,7 @@ class _SwitchesPageState extends State<SwitchesPage> {
       ),
       body: VxBuilder(
         builder: (context, _, __) {
-          int noOfDevices = (VxState.store as Mystore).noOfDevices;
+          int noOfDevices = 1;
           return Container(
             child: Column(
               children: [
@@ -141,7 +141,9 @@ class _SwitchesPageState extends State<SwitchesPage> {
             ),
           );
         },
-        mutations: {CreateSwitch},
+        mutations: {
+          // CreateSwitch
+        },
       ),
     );
   }
@@ -263,7 +265,7 @@ class _SwitchesPageState extends State<SwitchesPage> {
                               //Use vxstore
 
                               Navigator.pop(context);
-                              CreateSwitch();
+                              // CreateSwitch(); //implemetn more
                             },
                             child: "Create".text.xl2.bold.make())
                       ],
@@ -294,9 +296,9 @@ class _SwitchesPageState extends State<SwitchesPage> {
   }
 }
 
-class CreateSwitch extends VxMutation<Mystore> {
-  @override
-  perform() {
-    store?.noOfDevices++;
-  }
-}
+// class CreateSwitch extends VxMutation<Mystore> {
+//   @override
+//   perform() {
+//     // store?.noOfDevices++;
+//   }
+// }
