@@ -6,19 +6,19 @@ class FanItem extends Item {
 
   FanItem({
     name,
-    iconOn,
-    iconOff,
+    // iconOn,
+    // iconOff,
     active,
-    color,
+    // color,
     type,
     this.speed = 0,
     this.knobvalue = 0,
   }) : super(
           name: name,
-          iconOn: iconOn,
-          iconOff: iconOff,
+          // iconOn: iconOn,
+          // iconOff: iconOff,
           active: active,
-          color: color,
+          // color: color,
           type: type,
         );
 }

@@ -2,27 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:ota_fix/core/store.dart';
 import 'package:ota_fix/model/fanItem_model.dart';
 import 'package:ota_fix/screen/component/on_off_widget.dart';
-import 'package:ota_fix/screen/component/semi_circle_widget.dart';
 import 'package:ota_fix/screen/component/speed_widget.dart';
-import 'package:ota_fix/screen/component/temperature_widget.dart';
-import 'package:ota_fix/screen/new%20fan/controlknob.dart';
 import 'package:ota_fix/screen/new%20fan/gesturedetector.dart';
-import 'package:ota_fix/screen/new%20fan/knobcontainer.dart';
 import 'package:ota_fix/screen/new%20fan/tickerpainter.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class FanScreen extends StatelessWidget {
-  double? _rotatorAngle;
-
-  GlobalKey _rotatorKey = GlobalKey();
-
   final _vxClass = (VxState.store as Mystore);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: VxBuilder(
-        mutations: {ChangeSpeed, ChangeStatus},
+        mutations: {ChangeStatus, ChangeValue, ChangeSpeed},
         builder: (BuildContext context, store, VxStatus? status) {
           return Container(
             height: MediaQuery.of(context).size.height,
@@ -30,7 +22,7 @@ class FanScreen extends StatelessWidget {
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: gradientGreen
+                  colors: getBackColor(_vxClass.myDevices[1].speed)!
                   //  getBackColor(_vxClass.myDevices[1].knobvalue)!,
                   ),
             ),
@@ -113,7 +105,9 @@ class FanScreen extends StatelessWidget {
                                         padding: EdgeInsets.all(80),
                                         child: CustomPaint(
                                           painter: TickPainter(
-                                              currentRed: 0 * 5) //0-15
+                                              currentRed: 5 *
+                                                  _vxClass.myDevices[1]
+                                                      .speed) //0-21 : 0 , 5 ,10 ,15,20
                                           ,
                                         ),
                                       ),
@@ -176,17 +170,11 @@ class FanScreen extends StatelessWidget {
                                 children: [
                                   SpeedWidget(
                                     fanItem: _vxClass.myDevices[1],
-                                    onPressed: (value) {
-                                      ChangeSpeed(value);
-                                    },
                                   ),
                                   // Spacer(),
                                   10.heightBox,
                                   OnOffWidget(
                                     fanItem: _vxClass.myDevices[1] as FanItem,
-                                    onChanged: (value) {
-                                      ChangeStatus(value);
-                                    },
                                   ),
                                   // SizedBox(
                                   //   height: 20,
@@ -216,33 +204,31 @@ class FanScreen extends StatelessWidget {
     return value.toInt();
   }
 
-  List<Color>? getBackColor(double value) {
-    int newValue = value.toInt();
-    if (newValue >= 16 && newValue < 19) {
+  List<Color>? getBackColor(int value) {
+    if (value == 0) {
       return gradientGreen;
-    } else if (newValue >= 19 && newValue < 22) {
+    } else if (value == 1) {
       return gradientTeal;
-    } else if (newValue >= 22 && newValue < 25) {
+    } else if (value == 2) {
       return gradientBlue;
-    } else if (newValue >= 25 && newValue < 28) {
+    } else if (value == 3) {
       return gradientViolet;
-    } else if (newValue >= 28) {
+    } else if (value == 4) {
       return gradientRed;
     }
   }
 
   Color? getSliderColor(double value) {
-    int newValue = value.toInt();
     Color? newColor;
-    if (newValue >= 16 && newValue < 19) {
+    if (value == 0) {
       newColor = colorGreen;
-    } else if (newValue >= 19 && newValue < 22) {
+    } else if (value == 1) {
       newColor = colorTeal;
-    } else if (newValue >= 22 && newValue < 25) {
+    } else if (value == 2) {
       newColor = colorBlue;
-    } else if (newValue >= 25 && newValue < 28) {
+    } else if (value == 3) {
       newColor = colorViolet;
-    } else if (newValue >= 28) {
+    } else if (value == 4) {
       newColor = colorRed;
     }
 

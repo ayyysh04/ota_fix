@@ -11,7 +11,7 @@ class TickPainter extends CustomPainter {
   final currentRed;
 
   TickPainter({
-    this.tickCount = 16,
+    this.tickCount = 21,
     this.tickPerSection = 5,
     this.tickInset = 0.0,
     this.currentRed,

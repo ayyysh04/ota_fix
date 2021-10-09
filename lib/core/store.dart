@@ -62,7 +62,7 @@ class ChangeSpeed extends VxMutation<Mystore> {
 
   @override
   perform() {
-    store!.myDevices[1].knobvalue = value * (pi / 3);
+    store!.myDevices[1].knobvalue = value * (pi / 4);
 
     store!.myDevices[1].speed = value;
   }
@@ -75,6 +75,18 @@ class ChangeValue extends VxMutation<Mystore> {
   });
   @override
   perform() {
+    int degreeTemp = (value * (180 / pi)).toInt();
+    print(degreeTemp);
+    if (degreeTemp == 0) {
+      ChangeSpeed(0);
+    } else if (degreeTemp >= 45 && degreeTemp < 90)
+      ChangeSpeed(1);
+    else if (degreeTemp >= 90 && degreeTemp < 135)
+      ChangeSpeed(2);
+    else if (degreeTemp >= 135 && degreeTemp < 179)
+      ChangeSpeed(3);
+    else if (degreeTemp == 179) ChangeSpeed(4);
+
     store!.myDevices[1].knobvalue = value;
   }
 }
