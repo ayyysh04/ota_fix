@@ -120,7 +120,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width / 2,
+      width: MediaQuery.of(context).size.width * 0.8,
       margin: EdgeInsets.only(top: 160),
       child: Form(
         key: _formKey,

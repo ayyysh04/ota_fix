@@ -211,18 +211,21 @@ class _SignUpState extends State<SignUp> {
                     borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: Color(0xFFfbab66),
+                        color: Color.fromRGBO(63, 109, 180, 1),
                         offset: Offset(1.0, 6.0),
                         blurRadius: 20.0,
                       ),
                       BoxShadow(
-                        color: Color(0xFFf7418c),
+                        color: Color.fromRGBO(66, 209, 171, 1),
                         offset: Offset(1.0, 6.0),
                         blurRadius: 20.0,
                       ),
                     ],
                     gradient: LinearGradient(
-                        colors: <Color>[Color(0xFFf7418c), Color(0xFFfbab66)],
+                        colors: <Color>[
+                          Color.fromRGBO(63, 109, 180, 1),
+                          Color.fromRGBO(66, 209, 171, 1),
+                        ],
                         begin: FractionalOffset(0.2, 0.2),
                         end: FractionalOffset(1.0, 1.0),
                         stops: <double>[0.0, 1.0],
@@ -230,7 +233,7 @@ class _SignUpState extends State<SignUp> {
                   ),
                   child: MaterialButton(
                     highlightColor: Colors.transparent,
-                    splashColor: Color(0xFFf7418c),
+                    // splashColor: Color(0xFFf7418c),
                     //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
                     child: const Padding(
                       padding: EdgeInsets.symmetric(

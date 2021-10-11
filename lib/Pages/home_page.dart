@@ -4,10 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:ota_fix/Pages/add_device.dart';
+import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/model/room_model.dart';
+import 'package:velocity_x/velocity_x.dart';
+
 import 'package:ota_fix/Pages/power_usage_page.dart';
 import 'package:ota_fix/Pages/profile_page.dart';
 import 'package:ota_fix/Pages/switches_page.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -17,6 +22,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? _chosenValue;
   late PageController pageController;
   int _currentPage = 0;
   @override
@@ -44,6 +50,8 @@ class _HomePageState extends State<HomePage> {
     // int? _selectedIndex = (VxState.store as Mystore).selectedIndex;
     // VxState.watch(context, on: [OnItemTapped]);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      // backgroundColor: Colors.transparent,
       body: PageView(
         physics: BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
@@ -130,7 +138,31 @@ class _HomePageState extends State<HomePage> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  "Rooms".text.xl2.bold.make(),
+                  Row(
+                    children: [
+                      Spacer(
+                        flex: 2,
+                      ),
+                      "Rooms".text.xl2.bold.make(),
+                      Spacer(
+                        flex: 1,
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          shape: CircleBorder(),
+                          padding: EdgeInsets.all(10),
+                          primary: Vx.gray400,
+                          // onPrimary: Colors.red,
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamed(
+                              context, ""); //navigate to wifi connect
+                          //room means new nodemcu so we will be requiring to configure a new nodemcu for that
+                        },
+                        child: Icon(Icons.add),
+                      ),
+                    ],
+                  ),
                   5.heightBox,
                   RoomSliderWidget(
                     constraints: constraints,
@@ -146,6 +178,68 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     ).pOnly(top: 20, left: 15, right: 15, bottom: 0);
+  }
+
+  _customModalBottomSheet(BuildContext scaffoldContext) {
+    return showModalBottomSheet(
+        isScrollControlled: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(40),
+          ),
+        ),
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        context: scaffoldContext,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (BuildContext context,
+                void Function(void Function()) setState) {
+              String? _chosenValue;
+              return Container(
+                  // height: 320,
+                  child: Form(
+                // key: _formKey,
+                child: Container(
+                  child: DropdownButtonHideUnderline(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        "New Room Config".text.xl3.bold.make(),
+                        20.heightBox,
+                        Icon(
+                          FontAwesomeIcons.laptopHouse,
+                          size: 90,
+                        ),
+                        10.heightBox,
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom),
+                          child: TextFormField(),
+                        ),
+                        10.heightBox,
+                        TextButton(
+                            style:
+                                ElevatedButton.styleFrom(primary: Vx.gray600),
+                            onPressed: () {
+                              //Use vxstore
+                              AddRoom("My new room");
+                              Navigator.pop(context);
+                              // CreateSwitch(); //implemetn more
+                            },
+                            child: "Create"
+                                .text
+                                .color(Colors.white)
+                                .xl2
+                                .bold
+                                .make())
+                      ],
+                    ),
+                  ),
+                ).pSymmetric(v: 20, h: 20),
+              ));
+            },
+          );
+        });
   }
 
   _uppperCardWidgets() {
@@ -367,9 +461,9 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
     super.dispose();
   }
 
-  int items = 3;
+  int items = (VxState.store as Mystore).noOfRoom;
   int _currentSliderIndex = 0;
-  List cardList = [Item1(), Item1()];
+  // List cardList = [RoomSliderContainerWidget(), RoomSliderContainerWidget()];
 
   List<T> map<T>(List list, Function handler) {
     List<T> result = [];
@@ -381,6 +475,8 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
 
   @override
   Widget build(BuildContext context) {
+    VxState.watch(context, on: [AddRoom]);
+
     return Container(
       child: Column(
           // mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -407,14 +503,14 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
                             borderRadius:
                                 BorderRadius.all(Radius.circular(20))),
                         // color: Colors.blueAccent,
-                        child: Item1(),
+                        child: RoomSliderContainerWidget(),
                       ),
                     ),
                   );
                 },
                 options: CarouselOptions(
                     // aspectRatio: 16 / 10,
-                    height: widget.constraints.maxHeight - 70,
+                    height: widget.constraints.maxHeight - 90,
                     enableInfiniteScroll: true,
                     pauseAutoPlayOnTouch: true,
                     // aspectRatio: 2.0,
@@ -501,9 +597,11 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
   }
 }
 
-class Item1 extends StatelessWidget {
-  const Item1({
+class RoomSliderContainerWidget extends StatelessWidget {
+  String roomName;
+  RoomSliderContainerWidget({
     Key? key,
+    this.roomName = "No Room added",
   }) : super(key: key);
 
   @override
@@ -525,12 +623,12 @@ class Item1 extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text("Data",
+          Text("$roomName",
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 22.0,
                   fontWeight: FontWeight.bold)),
-          Text("Data",
+          Text("More Data",
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 17.0,

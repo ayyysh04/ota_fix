@@ -1,21 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:ota_fix/Pages/login_page.dart';
-import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/Utils/routes.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
+import 'package:wifi_iot/wifi_iot.dart';
+
 class WifiConnnectPage extends StatelessWidget {
+  bool _isConnected = false;
+  connectToWifi() async {
+    _isConnected =
+        await WiFiForIoTPlugin.connect(accessPoint!, password: password);
+  }
+
   final info = NetworkInfo();
   WifiConnnectPage({Key? key}) : super(key: key);
-  final String? accessPoint = "Test input";
+  //These data comming from arduino
+  final String? accessPoint = "ota_fix_hotspot_1234";
   final String? password = "ayush";
   @override
   Widget build(BuildContext context) {
+    connectToWifi();
     return Scaffold(
       appBar: AppBar(
-        title: "Wifi Config".text.make(),
+        title: "Wifi Config".text.color(Colors.black).make(),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -28,7 +38,10 @@ class WifiConnnectPage extends StatelessWidget {
                 .bold
                 .make()
                 .centered()
-                .pOnly(top: 50, bottom: 20),
+                .pOnly(
+                  top: 50,
+                ),
+            10.heightBox,
             //Wifi Config Image
             Image.asset(
               "assets/images/wifi_config.png",
@@ -37,7 +50,7 @@ class WifiConnnectPage extends StatelessWidget {
             ),
             //Details
             "Configure it with these details".text.make(),
-
+            10.heightBox,
             //Config screen
             SizedBox(
               width: 350,
@@ -106,6 +119,12 @@ class WifiConnnectPage extends StatelessWidget {
                             });
                       }
                     } else {
+                      if (!_isConnected) {
+                        CustomSnackBar(
+                            context,
+                            Text(
+                                "Cannot connect to WiFi ,Try connecting manually"));
+                      }
                       String? wifiName = await info.getWifiName();
                       if (wifiName != accessPoint) {
                         print(wifiName);
@@ -113,11 +132,8 @@ class WifiConnnectPage extends StatelessWidget {
                             context,
                             Text(
                                 "You are not connected to the device hotspot,Retry!!!"));
-                      }
-
-                      //else
-                      //next page
-
+                      } else
+                        Navigator.pushNamed(context, MyRoutes.deviceWiFiRoute);
                     }
                   }
                 },

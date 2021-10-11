@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:ota_fix/Utils/Loginpage/bubble_indicator_painter.dart';
 import 'package:ota_fix/Widgets/sign_in.dart';
 import 'package:ota_fix/Widgets/sign_up.dart';
+import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/model/wifi_model.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -44,11 +47,14 @@ class _LoginPageState extends State<LoginPage>
               begin: Alignment(-0.12, -1.0),
               end: Alignment(-0.1, 0.9),
               colors: [
-                const Color(0xffff6a83),
-                const Color(0xfff98875),
-                const Color(0xfff3a866)
+                Color.fromRGBO(63, 109, 180, 1),
+                Color.fromRGBO(66, 209, 171, 1),
+                // const Color(0xffff6a83),
+                // const Color(0xfff98875),
+                // const Color(0xfff3a866)
               ],
-              stops: [0.0, 0.488, 1.0],
+              stops: [0.2, 0.5],
+              // stops: [0.0, 0.488, 1.0],
             ),
           ),
           child: Column(
@@ -126,7 +132,7 @@ class _LoginPageState extends State<LoginPage>
                 ),
                 onPressed: _onSignInButtonPress,
                 child: Text(
-                  'Existing',
+                  'Sign in',
                   style: TextStyle(
                       color: left,
                       fontSize: 16.0,
@@ -142,7 +148,7 @@ class _LoginPageState extends State<LoginPage>
                 ),
                 onPressed: _onSignUpButtonPress,
                 child: Text(
-                  'New',
+                  'Sign Up',
                   style: TextStyle(
                       color: right,
                       fontSize: 16.0,

@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:ota_fix/Utils/Loginpage/snackbar.dart';
+import 'package:ota_fix/Utils/routes.dart';
+import 'package:ota_fix/model/firebase_auth.dart';
 
 class SignIn extends StatefulWidget {
   @override
@@ -14,6 +18,8 @@ class _SignInState extends State<SignIn> {
     super.initState();
   }
 
+  String? _email;
+  String? _pass;
   bool _obscureTextPassword = true;
   TextEditingController? loginEmailController;
   final TextEditingController loginPasswordController = TextEditingController();
@@ -70,6 +76,9 @@ class _SignInState extends State<SignIn> {
                                   fontFamily: 'WorkSansSemiBold',
                                   fontSize: 17.0),
                             ),
+                            onChanged: (value) {
+                              _email = value;
+                            },
                             onSubmitted: (_) {
                               focusNodePassword.requestFocus();
                             },
@@ -113,6 +122,9 @@ class _SignInState extends State<SignIn> {
                                 ),
                               ),
                             ),
+                            onChanged: (value) {
+                              _pass = value;
+                            },
                             onSubmitted: (_) {
                               _toggleSignInButton();
                             },
@@ -129,18 +141,21 @@ class _SignInState extends State<SignIn> {
                     borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: Color(0xFFfbab66),
+                        color: Color.fromRGBO(63, 109, 180, 1),
                         offset: Offset(1.0, 6.0),
                         blurRadius: 20.0,
                       ),
                       BoxShadow(
-                        color: Color(0xFFf7418c),
+                        color: Color.fromRGBO(66, 209, 171, 1),
                         offset: Offset(1.0, 6.0),
                         blurRadius: 20.0,
                       ),
                     ],
                     gradient: LinearGradient(
-                        colors: <Color>[Color(0xFFf7418c), Color(0xFFfbab66)],
+                        colors: <Color>[
+                          Color.fromRGBO(63, 109, 180, 1),
+                          Color.fromRGBO(66, 209, 171, 1),
+                        ],
                         begin: FractionalOffset(0.2, 0.2),
                         end: FractionalOffset(1.0, 1.0),
                         stops: <double>[0.0, 1.0],
@@ -148,7 +163,7 @@ class _SignInState extends State<SignIn> {
                   ),
                   child: MaterialButton(
                     highlightColor: Colors.transparent,
-                    splashColor: Color(0xFFf7418c),
+                    // splashColor: Color.fromRGBO(63, 109, 180, 1),
                     child: const Padding(
                       padding: EdgeInsets.symmetric(
                           vertical: 10.0, horizontal: 42.0),
@@ -160,8 +175,13 @@ class _SignInState extends State<SignIn> {
                             fontFamily: 'WorkSansBold'),
                       ),
                     ),
-                    onPressed: () => CustomSnackBar(
-                        context, const Text('Login button pressed')),
+                    onPressed: () async {
+                      //assert of email and pass cant be null
+                      await FirebaseAuthData.signInWithEmailAndPassword(
+                          _email!, _pass!, context);
+                      Navigator.pushReplacementNamed(
+                          context, MyRoutes.homeRoute);
+                    },
                   ),
                 )
               ],
@@ -242,7 +262,7 @@ class _SignInState extends State<SignIn> {
                         color: Colors.white,
                       ),
                       child: const Icon(
-                        Icons.facebook_outlined,
+                        FontAwesomeIcons.facebook,
                         color: Color(0xFF0084ff),
                       ),
                     ),
@@ -260,7 +280,7 @@ class _SignInState extends State<SignIn> {
                         color: Colors.white,
                       ),
                       child: const Icon(
-                        Icons.facebook,
+                        FontAwesomeIcons.google,
                         color: Color(0xFF0084ff),
                       ),
                     ),

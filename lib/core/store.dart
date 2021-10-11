@@ -1,7 +1,10 @@
 import 'dart:math';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ota_fix/model/fanItem_model.dart';
+import 'package:ota_fix/model/firebase.dart';
+import 'package:ota_fix/model/firebase_auth.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import 'package:ota_fix/Utils/themes.dart';
@@ -10,8 +13,9 @@ import 'package:ota_fix/model/deviceItem_model.dart';
 //This will store all the models which are getting manupulated / very imp in our app
 //I.e all the class objects are made here and accessed to the Vxstore
 class Mystore extends VxStore {
+  FirebaseDatabaseData firebaseData = FirebaseDatabaseData();
   List<dynamic> myDevices = [];
-
+  int noOfRoom = 0;
   MyTheme? themeMode;
   //constructor ,We can also define them initially like done in above comments too
   Mystore() {

@@ -26,9 +26,17 @@ class _SwitchesPageState extends State<SwitchesPage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 100,
-        title: widget.roomName.text.bold.make(),
+        title: widget.roomName.text.color(Colors.black).bold.make(),
         centerTitle: true,
-        leading: Icon(Icons.arrow_back_ios_new_rounded),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 30,
+          ),
+        ),
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
