@@ -22,6 +22,7 @@ environment:
 
 dependencies:
   carousel_slider: ^4.0.0
+  cloud_firestore: ^2.5.3
   cupertino_icons: ^1.0.2
   dotted_border: ^2.0.0+1
   easy_splash_screen: ^1.0.3
@@ -32,6 +33,7 @@ dependencies:
   font_awesome_flutter: ^9.1.0
   glassmorphism_ui: ^0.2.0
   google_fonts: ^2.1.0
+  http: ^0.13.4
   line_awesome_flutter: ^2.0.0
   network_info_plus: ^1.1.0
   outline_material_icons: ^0.1.1
@@ -39,7 +41,7 @@ dependencies:
   velocity_x: ^3.3.0
   websafe_svg: ^2.0.0
   wifi_iot: ^0.3.8
-  http: ^0.13.4
+  community_material_icon: ^5.9.55
 dev_dependencies:
   flutter_test:
     sdk: flutter

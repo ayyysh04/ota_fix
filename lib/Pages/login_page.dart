@@ -3,6 +3,7 @@ import 'package:ota_fix/Utils/Loginpage/bubble_indicator_painter.dart';
 import 'package:ota_fix/Widgets/sign_in.dart';
 import 'package:ota_fix/Widgets/sign_up.dart';
 import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/model/firebase_auth_utility.dart';
 import 'package:ota_fix/model/wifi_model.dart';
 import 'package:velocity_x/velocity_x.dart';
 

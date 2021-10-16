@@ -1,15 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_splash_screen/easy_splash_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ota_fix/Pages/Dump_pages/signin_page.dart';
+import 'package:ota_fix/Pages/all_users_page.dart';
 import 'package:ota_fix/Pages/device_wifi_config.dart';
 import 'package:ota_fix/Pages/home_page.dart';
 import 'package:ota_fix/Pages/login_page.dart';
 import 'package:ota_fix/Pages/device_hotspot_connect.dart';
+import 'package:ota_fix/Pages/room_setup_page.dart';
 import 'package:ota_fix/Utils/routes.dart';
 import 'package:ota_fix/Utils/themes.dart';
 import 'package:ota_fix/core/store.dart';
-import 'package:ota_fix/model/firebase_auth.dart';
+import 'package:ota_fix/model/firebase_auth_utility.dart';
+import 'package:ota_fix/model/firebase_database_utility.dart';
+import 'package:ota_fix/model/firestore_utility.dart';
+import 'package:ota_fix/model/room_model.dart';
 import 'package:ota_fix/model/wifi_model.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -39,6 +45,7 @@ class _MyAppState extends State<MyApp> {
       routes: {
         MyRoutes.loginRoute: (context) => SigninPage(),
         MyRoutes.homeRoute: (context) => HomePage(),
+        MyRoutes.allUsersRoute: (context) => AllUsersPage(),
       },
     );
   }
@@ -67,13 +74,16 @@ class SplashScreenWidget extends StatelessWidget {
   Future<Object>? _futureNav(context) async {
     await Firebase.initializeApp();
     FirebaseAuthData.auth = FirebaseAuth.instance;
-    //for open homepage directyl if user is already sign in
-    // if (FirebaseAuthData.auth.currentUser != null) {
-    //   return Future.value(HomePage());
-    // }
-    (VxState.store as Mystore).firebaseData.intitilizeDatabase();
+    FirestoreUtility.intitilizeFirestore();
+    FirebaseDatabaseUtility.intitilizeDatabase();
+
+    // for open homepage directyl if user is already sign in
+    if (FirebaseAuthData.auth.currentUser != null) {
+      return Future.value(HomePage());
+    }
+
     await Future.delayed(Duration(seconds: 3));
 
-    return Future.value(DeviceConfig());
+    return Future.value(LoginPage()); //loginpage will come
   }
 }

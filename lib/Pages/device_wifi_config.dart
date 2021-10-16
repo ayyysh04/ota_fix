@@ -36,10 +36,10 @@ class _DeviceConfigState extends State<DeviceConfig> {
     //dummy Data
     Map<String, dynamic> datain = {
       "Devices": [
-        {"ssid": "Anita", "rssi": "-50", "security": "8"},
+        {"ssid": "Anita", "rssi": "-40", "security": "8"},
         {"ssid": "nita", "rssi": "-0", "security": "5"},
         {"ssid": "ta", "rssi": "-90", "security": "1"},
-        {"ssid": "ta", "rssi": "-90", "security": "1"},
+        {"ssid": "tata", "rssi": "-90", "security": "7"},
       ]
     };
     // wifiData = WifiModel.fromMap(datain);
@@ -123,6 +123,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         snapshot.hasData) {
                       WifiModel wifiModelData =
                           WifiModel.fromMap(snapshot.data);
+
                       return ListView.separated(
                           itemBuilder: (context, index) {
                             return ListTile(

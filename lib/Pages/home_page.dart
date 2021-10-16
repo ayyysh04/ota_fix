@@ -1,4 +1,9 @@
+import 'dart:async';
+
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
+import 'package:firebase_database/ui/firebase_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,7 +11,9 @@ import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:ota_fix/Pages/add_device.dart';
+import 'package:ota_fix/Widgets/custom_bottom_navbar.dart';
 import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/model/firebase_auth_utility.dart';
 import 'package:ota_fix/model/room_model.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -25,10 +32,57 @@ class _HomePageState extends State<HomePage> {
   String? _chosenValue;
   late PageController pageController;
   int _currentPage = 0;
+  late StreamSubscription<Event> userIdDataAddSubscription;
+  late StreamSubscription<Event> userRoomDataChangeSubscription;
   @override
   void initState() {
     super.initState();
     pageController = PageController(initialPage: 0);
+    // Query _userdIdQuery = FirebaseDatabase.instance
+    //     .reference()
+    //     .child("users")
+    //     .child(FirebaseAuthData.auth.currentUser!.uid)
+    //     .child("rooms")
+    //     .child(
+    //         "room1") //get the roomname from listview of rooms currently shown on screen to save the stream/data  (note that rooms are nodemcu)
+    //     .child("Devices")
+    //     .orderByKey();
+    //Stream at devices to get that particular device data only
+
+    // Query _userRoomNameQuerey = FirebaseDatabase.instance
+    // .reference()
+    // .child("users")
+    // .child(FirebaseAuthData.auth.currentUser!.uid)
+    // .child("rooms")
+    // .equalTo("$roomno")//get the roomname from listview of rooms currently shown on screen to save the stream/data  (note that rooms are nodemcu)
+    // .child("roomname").orderByKey();
+
+    // Query _userdRoomQuery = FirebaseDatabase.instance
+    //     .reference()
+    //     .child("users")
+    //     .child(FirebaseAuthData.auth.currentUser!.uid)
+    //     .child("rooms");
+    // userIdDataAddSubscription = _userdIdQuery.onChildChanged.listen(
+    //     (event) //print all the values first time and then when child gets added ,only the child added part will come
+    //     {
+    //   print(event.snapshot.value);
+    // });
+
+//rooms
+    // userRoomDataChangeSubscription = _userdRoomQuery.onChildAdded.listen(
+    //     (event) //print all the values first time and then when child gets added ,only the child added part will come
+    //     {
+    //   print(event.snapshot.value);
+    // });
+  }
+
+//unique switch no
+
+  @override
+  void dispose() {
+    userIdDataAddSubscription.cancel();
+    userRoomDataChangeSubscription.cancel();
+    super.dispose();
   }
 
   double temp = 23.5;
@@ -63,35 +117,36 @@ class _HomePageState extends State<HomePage> {
         },
         children: [_homepage(), powerUsagePage(), ProfilePage()],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentPage,
-        selectedItemColor: Colors.amber[800],
-        onTap: _onItemTapped,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        items: [
-          BottomNavigationBarItem(
-              activeIcon: Icon(Icons.home, size: 30),
-              icon: Icon(Icons.home_outlined, size: 30),
-              label: "Home",
-              backgroundColor: Colors.transparent),
-          BottomNavigationBarItem(
-              activeIcon: Icon(CupertinoIcons.bolt_fill, size: 30),
-              icon: Icon(CupertinoIcons.bolt, size: 30),
-              label: "Power Usage",
-              backgroundColor: Colors.transparent),
-          BottomNavigationBarItem(
-            activeIcon: Icon(FontAwesomeIcons.userAlt, size: 30),
-            icon: Icon(
-              FontAwesomeIcons.user,
-              size: 30,
-            ),
-            label: "User profile",
-          ),
-        ],
-      ),
+      bottomNavigationBar: CustomBottomNavBar(),
+      //  BottomNavigationBar(
+      //   currentIndex: _currentPage,
+      //   selectedItemColor: Colors.amber[800],
+      //   onTap: _onItemTapped,
+      //   showSelectedLabels: false,
+      //   showUnselectedLabels: false,
+      //   backgroundColor: Colors.transparent,
+      //   elevation: 0,
+      //   items: [
+      //     BottomNavigationBarItem(
+      //         activeIcon: Icon(Icons.home, size: 30),
+      //         icon: Icon(Icons.home_outlined, size: 30),
+      //         label: "Home",
+      //         backgroundColor: Colors.transparent),
+      //     BottomNavigationBarItem(
+      //         activeIcon: Icon(CupertinoIcons.bolt_fill, size: 30),
+      //         icon: Icon(CupertinoIcons.bolt, size: 30),
+      //         label: "Power Usage",
+      //         backgroundColor: Colors.transparent),
+      //     BottomNavigationBarItem(
+      //       activeIcon: Icon(FontAwesomeIcons.userAlt, size: 30),
+      //       icon: Icon(
+      //         FontAwesomeIcons.user,
+      //         size: 30,
+      //       ),
+      //       label: "User profile",
+      //     ),
+      //   ],
+      // ),
     );
   }
 

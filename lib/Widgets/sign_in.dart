@@ -4,7 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:ota_fix/Utils/Loginpage/snackbar.dart';
 import 'package:ota_fix/Utils/routes.dart';
-import 'package:ota_fix/model/firebase_auth.dart';
+import 'package:ota_fix/model/firebase_auth_utility.dart';
 
 class SignIn extends StatefulWidget {
   @override

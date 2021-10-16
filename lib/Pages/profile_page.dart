@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:ota_fix/Utils/routes.dart';
+import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/model/firebase_auth_utility.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -74,6 +77,16 @@ class ProfilePage extends StatelessWidget {
                       title: 'Change Username',
                       disible: false),
                 ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, MyRoutes.allUsersRoute);
+                  },
+                  child: _profileListItems(
+                      context: context,
+                      icon: LineAwesomeIcons.user_shield,
+                      title: 'All Users',
+                      disible: false),
+                ),
                 _profileListItems(
                     context: context,
                     icon: LineAwesomeIcons.question_circle,
@@ -90,7 +103,10 @@ class ProfilePage extends StatelessWidget {
                     title: 'Privacy',
                     disible: true),
                 GestureDetector(
-                  onTap: () async {},
+                  onTap: () async {
+                    await FirebaseAuthData.logOut();
+                    Navigator.pop(context);
+                  },
                   child: _profileListItems(
                       context: context,
                       icon: LineAwesomeIcons.alternate_sign_out,

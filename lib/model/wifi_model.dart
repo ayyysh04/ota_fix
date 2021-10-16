@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 class WifiModel {
@@ -31,19 +33,33 @@ class Device {
   factory Device.fromMap(Map<String, dynamic> map) {
     IconData _wifiIcon;
     String _security;
-    if (map['security'] == 7) //open
+    if (int.parse(map['security']) == 7) //open
     {
       _security = "open";
       if (int.parse(map['rssi']) > -50) {
-        _wifiIcon = Icons.signal_wifi_4_bar;
-      } else
-        _wifiIcon = Icons.signal_wifi_0_bar;
+        _wifiIcon = CommunityMaterialIcons.wifi_strength_1;
+      } else if (int.parse(map['rssi']) <= -50 &&
+          int.parse(map['rssi']) > -60) {
+        _wifiIcon = CommunityMaterialIcons.wifi_strength_2;
+      } else if (int.parse(map['rssi']) <= -60 &&
+          int.parse(map['rssi']) > -70) {
+        _wifiIcon = CommunityMaterialIcons.wifi_strength_3;
+      } else {
+        _wifiIcon = CommunityMaterialIcons.wifi_strength_4;
+      }
     } else {
       _security = "secured";
       if (int.parse(map['rssi']) > -50) {
-        _wifiIcon = Icons.signal_wifi_4_bar_lock;
-      } else
-        _wifiIcon = Icons.signal_wifi_0_bar;
+        _wifiIcon = CommunityMaterialIcons.wifi_strength_1_lock;
+      } else if (int.parse(map['rssi']) <= -50 &&
+          int.parse(map['rssi']) > -60) {
+        _wifiIcon = CommunityMaterialIcons.wifi_strength_2_lock;
+      } else if (int.parse(map['rssi']) <= -60 &&
+          int.parse(map['rssi']) > -70) {
+        _wifiIcon = CommunityMaterialIcons.wifi_strength_3_lock;
+      } else {
+        _wifiIcon = CommunityMaterialIcons.wifi_strength_4_lock;
+      }
     }
     return Device(
       ssid: map['ssid'],
