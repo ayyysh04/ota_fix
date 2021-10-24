@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -179,6 +180,11 @@ class _SignInState extends State<SignIn> {
                       //assert of email and pass cant be null
                       await FirebaseAuthData.signInWithEmailAndPassword(
                           _email!, _pass!, context);
+                      // FirebaseDatabase.instance
+                      //     .reference()
+                      //     .child('users')
+                      //     .child(FirebaseAuthData.auth.currentUser!.uid)
+                      //     .get();
                       Navigator.pushReplacementNamed(
                           context, MyRoutes.homeRoute);
                     },

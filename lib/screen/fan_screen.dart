@@ -1,20 +1,68 @@
+import 'dart:async';
+
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:ota_fix/core/store.dart';
-import 'package:ota_fix/model/fanItem_model.dart';
+import 'package:ota_fix/model/device_model.dart' as deviceModel;
+import 'package:ota_fix/model/firebase_auth_utility.dart';
+import 'package:ota_fix/model/room_model.dart' as roomModel;
+import 'package:ota_fix/model/room_model.dart';
+import 'package:velocity_x/velocity_x.dart';
+
 import 'package:ota_fix/screen/component/on_off_widget.dart';
 import 'package:ota_fix/screen/component/speed_widget.dart';
 import 'package:ota_fix/screen/new%20fan/gesturedetector.dart';
 import 'package:ota_fix/screen/new%20fan/tickerpainter.dart';
-import 'package:velocity_x/velocity_x.dart';
 
-class FanScreen extends StatelessWidget {
-  final _vxClass = (VxState.store as Mystore);
+class FanScreen extends StatefulWidget {
+  int roomIndex;
+  int deviceIndex; //index of fan item in device list
+  FanScreen({
+    required this.roomIndex,
+    Key? key,
+    required this.deviceIndex,
+  }) : super(key: key);
+
+  @override
+  State<FanScreen> createState() => _FanScreenState();
+}
+
+class _FanScreenState extends State<FanScreen> {
+  StreamSubscription<Event>? fandeviceDataChangeSubscription;
+  @override
+  void initState() {
+    Query _fanDeviceDataChangeQuery = FirebaseDatabase.instance
+        .reference()
+        .child("users")
+        .child(FirebaseAuthData.auth.currentUser!.uid)
+        .child("rooms")
+        .child(roomModel.RoomListData.roomData![widget.roomIndex].roomID)
+        .child("Devices");
+    // .child(RoomListData
+    //     .roomData![widget.roomIndex].devicesData[widget.deviceIndex].key!);
+    fandeviceDataChangeSubscription =
+        _fanDeviceDataChangeQuery.onChildChanged.listen((event) {
+      print(event.snapshot.value);
+      deviceModel.OnEntryChanged(event: event, roomIndex: widget.roomIndex);
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    fandeviceDataChangeSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: VxBuilder(
-        mutations: {ChangeStatus, ChangeValue, ChangeSpeed},
+        mutations: {
+          deviceModel.ChangeStatus,
+          deviceModel.ChangeValue,
+          deviceModel.ChangeSpeed,
+          deviceModel.OnEntryChanged,
+        },
         builder: (BuildContext context, store, VxStatus? status) {
           return Container(
             height: MediaQuery.of(context).size.height,
@@ -22,8 +70,10 @@ class FanScreen extends StatelessWidget {
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: getBackColor(_vxClass.myDevices[1].speed)!
-                  //  getBackColor(_vxClass.myDevices[1].knobvalue)!,
+                  colors: getBackColor(RoomListData.roomData![widget.roomIndex]
+                          .devicesData![widget.deviceIndex].speed ??
+                      0)! //(??):just to avoid null case out deviceitem of fan will have a speed key
+                  //  getBackColor(_vxClass.myDevices[deviceIndex].knobvalue)!,
                   ),
             ),
             child: SafeArea(
@@ -52,7 +102,8 @@ class FanScreen extends StatelessWidget {
                         },
                       ),
                       Text(
-                        _vxClass.myDevices[1].name,
+                        RoomListData.roomData![widget.roomIndex]
+                            .devicesData![widget.deviceIndex].devicename,
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -106,8 +157,13 @@ class FanScreen extends StatelessWidget {
                                         child: CustomPaint(
                                           painter: TickPainter(
                                               currentRed: 5 *
-                                                  _vxClass.myDevices[1]
-                                                      .speed) //0-21 : 0 , 5 ,10 ,15,20
+                                                  ((RoomListData
+                                                          .roomData![
+                                                              widget.roomIndex]
+                                                          .devicesData![widget
+                                                              .deviceIndex]
+                                                          .speed) ??
+                                                      0)) //0-21 : 0 , 5 ,10 ,15,20
                                           ,
                                         ),
                                       ),
@@ -120,18 +176,22 @@ class FanScreen extends StatelessWidget {
                                           //knob reading : 0 1 2 3
                                           //knob angle : 0 to pie
                                           child: CircleGestureDetector(
-                                            knobReading: 3,
+                                            //  DeviceData
+                                            //     .devicesList![deviceIndex]
+                                            //     .knobvalue!,
+                                            deviceIndex: widget.deviceIndex,
+                                            roomIndex: widget.roomIndex,
                                           )),
                                       // SemiCircleWidget //moving semiCircle using CustomPainter
                                       //     (
                                       //   diameter: 200,
                                       //   sweepAngle:
-                                      //       ((_vxClass.myDevices[1].speedValue -
+                                      //       ((_vxClass.myDevices[deviceIndex].speedValue -
                                       //                   15) *
                                       //               12.0)
                                       //           .clamp(0.0, 180.0),
                                       //   color: getSliderColor(
-                                      //       _vxClass.myDevices[1].speedValue),
+                                      //       _vxClass.myDevices[deviceIndex].speedValue),
                                       // ),
                                       // Container //inner solid round white circle
                                       //     (
@@ -152,7 +212,7 @@ class FanScreen extends StatelessWidget {
                                       //       ]),
                                       // ),
                                       // Text(
-                                      //   '${convertToInt(_vxClass.myDevices[1].speedValue)}°C',
+                                      //   '${convertToInt(_vxClass.myDevices[deviceIndex].speedValue)}°C',
                                       //   style: TextStyle(
                                       //       fontSize: 60,
                                       //       fontWeight: FontWeight.w600),
@@ -169,18 +229,20 @@ class FanScreen extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   SpeedWidget(
-                                    fanItem: _vxClass.myDevices[1],
+                                    deviceIndex: widget.deviceIndex,
+                                    roomIndex: widget.roomIndex,
                                   ),
                                   // Spacer(),
                                   10.heightBox,
                                   OnOffWidget(
-                                    fanItem: _vxClass.myDevices[1] as FanItem,
+                                    deviceIndex: widget.deviceIndex,
+                                    roomIndex: widget.roomIndex,
                                   ),
                                   // SizedBox(
                                   //   height: 20,
                                   // ),
                                   // TemperatureWidget(
-                                  //   fanItem: _vxClass.myDevices[1],
+                                  //   fanItem: _vxClass.myDevices[deviceIndex],
                                   //   onChanged: (value) {
                                   //     ChangeValue(value: value);
                                   //   },

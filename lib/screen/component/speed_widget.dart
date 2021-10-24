@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:ota_fix/core/store.dart';
-import 'package:ota_fix/model/fanItem_model.dart';
-import 'package:ota_fix/screen/fan_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
+
+import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/model/device_model.dart';
+import 'package:ota_fix/model/fanItem_model.dart';
+import 'package:ota_fix/model/room_model.dart';
+import 'package:ota_fix/screen/fan_screen.dart';
 
 class SpeedWidget extends StatelessWidget {
   const SpeedWidget({
     Key? key,
-    @required this.fanItem,
+    required this.deviceIndex,
+    required this.roomIndex,
   }) : super(key: key);
-  final FanItem? fanItem;
+  final int deviceIndex;
+  final int roomIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +22,9 @@ class SpeedWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.0),
-        color: getBackColor(fanItem!.speed),
+        color: getBackColor(((RoomListData
+                .roomData![roomIndex].devicesData![deviceIndex].speed) ??
+            0)),
       ),
       // height: 100,
       width: MediaQuery.of(context).size.width * 0.8,
@@ -36,96 +43,152 @@ class SpeedWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               RawMaterialButton(
-                onPressed: fanItem!.active!
+                onPressed: RoomListData
+                        .roomData![roomIndex].devicesData![deviceIndex].status
                     ? () {
-                        ChangeSpeed(0);
+                        ChangeSpeed(
+                            value: 0,
+                            deviceIndex: deviceIndex,
+                            roomIndex: roomIndex);
                       }
                     : null,
-                fillColor:
-                    fanItem!.speed == 0 ? Colors.white : Colors.transparent,
+                fillColor: RoomListData.roomData![roomIndex]
+                            .devicesData![deviceIndex].speed ==
+                        0
+                    ? Colors.white
+                    : Colors.transparent,
                 elevation: 0,
                 constraints:
                     const BoxConstraints(minWidth: 38.0, minHeight: 38.0),
                 child: Text(
                   '0',
                   style: TextStyle(
-                      color: fanItem!.speed == 0 ? Colors.black : Colors.white,
+                      color: RoomListData.roomData![roomIndex]
+                                  .devicesData![deviceIndex].speed ==
+                              0
+                          ? Colors.black
+                          : Colors.white,
                       fontSize: 18),
                 ),
                 shape: CircleBorder(side: BorderSide(color: Colors.white)),
               ),
               RawMaterialButton(
-                onPressed: fanItem!.active!
+                onPressed: RoomListData
+                        .roomData![roomIndex].devicesData![deviceIndex].status
                     ? () {
-                        ChangeSpeed(1);
+                        ChangeSpeed(
+                          value: 1,
+                          deviceIndex: deviceIndex,
+                          roomIndex: roomIndex,
+                        );
                       }
                     : null,
-                fillColor:
-                    fanItem!.speed == 1 ? Colors.white : Colors.transparent,
+                fillColor: RoomListData.roomData![roomIndex]
+                            .devicesData![deviceIndex].speed ==
+                        1
+                    ? Colors.white
+                    : Colors.transparent,
                 elevation: 0,
                 constraints:
                     const BoxConstraints(minWidth: 38.0, minHeight: 38.0),
                 child: Text(
                   '1',
                   style: TextStyle(
-                      color: fanItem!.speed == 1 ? Colors.black : Colors.white,
+                      color: RoomListData.roomData![roomIndex]
+                                  .devicesData![deviceIndex].speed ==
+                              1
+                          ? Colors.black
+                          : Colors.white,
                       fontSize: 18),
                 ),
                 shape: CircleBorder(side: BorderSide(color: Colors.white)),
               ),
               RawMaterialButton(
-                onPressed: fanItem!.active!
+                onPressed: RoomListData
+                        .roomData![roomIndex].devicesData![deviceIndex].status
                     ? () {
-                        ChangeSpeed(2);
+                        ChangeSpeed(
+                            value: 2,
+                            deviceIndex: deviceIndex,
+                            roomIndex: roomIndex);
                       }
                     : null,
-                fillColor:
-                    fanItem!.speed == 2 ? Colors.white : Colors.transparent,
+                fillColor: RoomListData.roomData![roomIndex]
+                            .devicesData![deviceIndex].speed ==
+                        2
+                    ? Colors.white
+                    : Colors.transparent,
                 elevation: 0,
                 constraints:
                     const BoxConstraints(minWidth: 38.0, minHeight: 38.0),
                 child: Text(
                   '2',
                   style: TextStyle(
-                      color: fanItem!.speed == 2 ? Colors.black : Colors.white,
+                      color: RoomListData.roomData![roomIndex]
+                                  .devicesData![deviceIndex].speed ==
+                              2
+                          ? Colors.black
+                          : Colors.white,
                       fontSize: 18),
                 ),
                 shape: CircleBorder(side: BorderSide(color: Colors.white)),
               ),
               RawMaterialButton(
-                onPressed: fanItem!.active!
+                onPressed: RoomListData
+                        .roomData![roomIndex].devicesData![deviceIndex].status
                     ? () {
-                        ChangeSpeed(3);
+                        ChangeSpeed(
+                            value: 3,
+                            deviceIndex: deviceIndex,
+                            roomIndex: roomIndex);
                       }
                     : null,
-                fillColor:
-                    fanItem!.speed == 3 ? Colors.white : Colors.transparent,
+                fillColor: RoomListData.roomData![roomIndex]
+                            .devicesData![deviceIndex].speed ==
+                        3
+                    ? Colors.white
+                    : Colors.transparent,
                 elevation: 0,
                 constraints:
                     const BoxConstraints(minWidth: 38.0, minHeight: 38.0),
                 child: Text(
                   '3',
                   style: TextStyle(
-                      color: fanItem!.speed == 3 ? Colors.black : Colors.white,
+                      color: RoomListData.roomData![roomIndex]
+                                  .devicesData![deviceIndex].speed ==
+                              3
+                          ? Colors.black
+                          : Colors.white,
                       fontSize: 18),
                 ),
                 shape: CircleBorder(side: BorderSide(color: Colors.white)),
               ),
               RawMaterialButton(
-                onPressed: fanItem!.active!
+                onPressed: RoomListData
+                        .roomData![roomIndex].devicesData![deviceIndex].status
                     ? () {
-                        ChangeSpeed(4);
+                        ChangeSpeed(
+                            value: 4,
+                            deviceIndex: deviceIndex,
+                            roomIndex: roomIndex);
                       }
                     : null,
-                fillColor:
-                    fanItem!.speed == 4 ? Colors.white : Colors.transparent,
+                fillColor: RoomListData.roomData![roomIndex]
+                            .devicesData![deviceIndex].speed ==
+                        4
+                    ? Colors.white
+                    : Colors.transparent,
                 elevation: 0,
                 constraints:
                     const BoxConstraints(minWidth: 38.0, minHeight: 38.0),
                 child: Text(
                   '4',
                   style: TextStyle(
-                      color: fanItem!.speed == 4 ? Colors.black : Colors.white,
+                      color: RoomListData.roomData![roomIndex]
+                                  .devicesData![deviceIndex].speed ==
+                              4
+                          ? Colors.black
+                          : Colors.white,
                       fontSize: 18),
                 ),
                 shape: CircleBorder(side: BorderSide(color: Colors.white)),

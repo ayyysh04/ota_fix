@@ -2,19 +2,16 @@ import 'dart:async';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
-import 'package:firebase_database/ui/firebase_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import 'package:ota_fix/Pages/add_device.dart';
+import 'package:ota_fix/Utils/routes.dart';
 import 'package:ota_fix/Widgets/custom_bottom_navbar.dart';
 import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/model/device_model.dart' as deviceModel;
 import 'package:ota_fix/model/firebase_auth_utility.dart';
-import 'package:ota_fix/model/room_model.dart';
+import 'package:ota_fix/model/room_model.dart' as roomModel;
 import 'package:velocity_x/velocity_x.dart';
 
 import 'package:ota_fix/Pages/power_usage_page.dart';
@@ -32,12 +29,41 @@ class _HomePageState extends State<HomePage> {
   String? _chosenValue;
   late PageController pageController;
   int _currentPage = 0;
-  late StreamSubscription<Event> userIdDataAddSubscription;
-  late StreamSubscription<Event> userRoomDataChangeSubscription;
+  // late StreamSubscription<Event> userIdDataAddSubscription;
+  // late StreamSubscription<Event> userRoomDataChangeSubscription;
+  late StreamSubscription<Event> userDeviceDataAddSubscription;
+  late StreamSubscription<Event> userDeviceDataChangeSubscription;
+  late StreamSubscription<Event> roomDataAddSubscription;
   @override
   void initState() {
     super.initState();
+    roomModel.RoomListData.roomData = [];
     pageController = PageController(initialPage: 0);
+    Query _roomDataQuery = FirebaseDatabase.instance
+        .reference()
+        .child("users")
+        .child(FirebaseAuthData.auth.currentUser!.uid)
+        .child("rooms");
+    roomDataAddSubscription = _roomDataQuery.onChildAdded.listen((event) {
+      roomModel.OnEntryAdded(event: event);
+    });
+    // Query _devicesDataQuery = FirebaseDatabase.instance
+    //     .reference()
+    //     .child("users")
+    //     .child(FirebaseAuthData.auth.currentUser!.uid)
+    //     .child("rooms")
+    //     .child("room1")
+    //     .child("Devices")
+    //     .orderByKey();
+    // userDeviceDataAddSubscription =
+    //     _devicesDataQuery.onChildAdded.listen((event) {
+    //   deviceModel.OnEntryAdded(event: event);
+    // });
+    // userDeviceDataChangeSubscription =
+    //     _devicesDataQuery.onChildChanged.listen((event) {
+    //   deviceModel.OnEntryChanged(event: event);
+    // });
+
     // Query _userdIdQuery = FirebaseDatabase.instance
     //     .reference()
     //     .child("users")
@@ -80,8 +106,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    userIdDataAddSubscription.cancel();
-    userRoomDataChangeSubscription.cancel();
+    // userIdDataAddSubscription.cancel();
+    // userRoomDataChangeSubscription.cancel();
+    userDeviceDataAddSubscription.cancel();
+    userDeviceDataChangeSubscription.cancel();
+    roomDataAddSubscription.cancel();
     super.dispose();
   }
 
@@ -101,6 +130,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // deviceModel.DeviceData.devicesList!.forEach((element) {
+    //   print(element.devicename);
+    //   print(element.devicetype);
+    //   print(element.key);
+    //   print(element.speed);
+    //   print(element.status);
+    //   print(element.switchno);
+    //   print("----------");
+    // });
     // int? _selectedIndex = (VxState.store as Mystore).selectedIndex;
     // VxState.watch(context, on: [OnItemTapped]);
     return Scaffold(
@@ -151,6 +189,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _homepage() {
+    // deviceModel.DeviceData.devicesList!.forEach((element) {
+    //   print(element.devicename);
+    //   print(element.devicetype);
+    //   print(element.key);
+    //   print(element.speed);
+    //   print(element.status);
+    //   print(element.switchno);
+    //   print("----------");
+    // });
     return Container(
       child: Flex(
         direction: Axis.vertical,
@@ -211,7 +258,9 @@ class _HomePageState extends State<HomePage> {
                         ),
                         onPressed: () {
                           Navigator.pushNamed(
-                              context, ""); //navigate to wifi connect
+                              context,
+                              MyRoutes
+                                  .deviceHotspotRoute); //navigate to wifi connect
                           //room means new nodemcu so we will be requiring to configure a new nodemcu for that
                         },
                         child: Icon(Icons.add),
@@ -226,10 +275,6 @@ class _HomePageState extends State<HomePage> {
               );
             }),
           ),
-          Divider(
-            thickness: 2,
-            height: 0,
-          )
         ],
       ),
     ).pOnly(top: 20, left: 15, right: 15, bottom: 0);
@@ -277,7 +322,7 @@ class _HomePageState extends State<HomePage> {
                                 ElevatedButton.styleFrom(primary: Vx.gray600),
                             onPressed: () {
                               //Use vxstore
-                              AddRoom("My new room");
+                              roomModel.AddRoom("My new room");
                               Navigator.pop(context);
                               // CreateSwitch(); //implemetn more
                             },
@@ -516,9 +561,7 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
     super.dispose();
   }
 
-  int items = (VxState.store as Mystore).noOfRoom;
   int _currentSliderIndex = 0;
-  // List cardList = [RoomSliderContainerWidget(), RoomSliderContainerWidget()];
 
   List<T> map<T>(List list, Function handler) {
     List<T> result = [];
@@ -530,7 +573,7 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
 
   @override
   Widget build(BuildContext context) {
-    VxState.watch(context, on: [AddRoom]);
+    VxState.watch(context, on: [roomModel.OnEntryAdded]);
 
     return Container(
       child: Column(
@@ -538,30 +581,37 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
 
           children: [
             CarouselSlider.builder(
-                itemCount: items,
+                itemCount: roomModel.RoomListData.roomData!.length,
                 itemBuilder: (BuildContext context, _, __) {
-                  return Container(
-                    padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
-                    // height: MediaQuery.of(context).size.height * 0.30,
-                    width: MediaQuery.of(context).size.width,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    SwitchesPage(roomName: "My Room")));
-                      },
-                      child: Card(
-                        clipBehavior: Clip.antiAlias,
-                        shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(20))),
-                        // color: Colors.blueAccent,
-                        child: RoomSliderContainerWidget(),
-                      ),
-                    ),
-                  );
+                  return roomModel.RoomListData.roomData!.isNotEmpty
+                      ? Container(
+                          padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+                          // height: MediaQuery.of(context).size.height * 0.30,
+                          width: MediaQuery.of(context).size.width,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SwitchesPage(
+                                          roomIndex: _currentSliderIndex)));
+                            },
+                            child: Card(
+                              clipBehavior: Clip.antiAlias,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                              // color: Colors.blueAccent,
+                              child: RoomSliderContainerWidget(
+                                roomName: roomModel.RoomListData
+                                    .roomData![_currentSliderIndex].roomName,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          child: "No room Created".text.make(),
+                        );
                 },
                 options: CarouselOptions(
                     // aspectRatio: 16 / 10,
@@ -619,7 +669,7 @@ class _RoomSliderWidgetState extends State<RoomSliderWidget> {
             Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List<Widget>.generate(
-                    items,
+                    roomModel.RoomListData.roomData!.length,
                     (index) => Container(
                           width: 10.0,
                           height: 10.0,

@@ -18,7 +18,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return Container(
-      height: 200,
+      height: 100,
       child: Stack(children: [
         Positioned(
           bottom: 0,

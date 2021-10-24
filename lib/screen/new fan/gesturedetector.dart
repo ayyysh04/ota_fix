@@ -1,18 +1,21 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:ota_fix/core/store.dart';
-import 'package:ota_fix/model/fanItem_model.dart';
-
-import 'package:ota_fix/screen/new%20fan/controlknob.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/model/device_model.dart';
+import 'package:ota_fix/model/fanItem_model.dart';
+import 'package:ota_fix/model/room_model.dart';
+import 'package:ota_fix/screen/new%20fan/controlknob.dart';
+
 class CircleGestureDetector extends StatelessWidget {
-  final _vxClass = (VxState.store as Mystore);
-  double knobReading;
+  final int roomIndex;
+  final int deviceIndex;
   CircleGestureDetector({
     Key? key,
-    required this.knobReading,
+    required this.roomIndex,
+    required this.deviceIndex,
   }) : super(key: key);
 
   double degree = 0;
@@ -48,11 +51,17 @@ class CircleGestureDetector extends StatelessWidget {
 
     // bool movingClockwise = rotationalChange > 0;
     // bool movingCounterClockwise = rotationalChange < 0;
-    double temp = (_vxClass.myDevices[1] as FanItem).knobvalue! * (180 / pi) +
-        (rotationalChange / 1.5);
+
+    double temp =
+        RoomListData.roomData![roomIndex].devicesData![deviceIndex].knobvalue! *
+                (180 / pi) +
+            (rotationalChange / 1.5);
     // setState(() {
     if (temp >= 0 && temp <= 180) {
-      ChangeValue(value: temp * (pi / 180));
+      ChangeValue(
+          value: temp * (pi / 180),
+          deviceIndex: deviceIndex,
+          roomIndex: roomIndex);
 
       // (widget._vxClass.myDevices[1] as FanItem).knobvalue = temp;
     }
@@ -63,12 +72,17 @@ class CircleGestureDetector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(
+        RoomListData.roomData![roomIndex].devicesData![deviceIndex].knobvalue);
     // print((widget._vxClass.myDevices[1] as FanItem).knobvalue);
     return GestureDetector(
         onPanUpdate:
-            (_vxClass.myDevices[1] as FanItem).active! ? _panHandler : null,
+            RoomListData.roomData![roomIndex].devicesData![deviceIndex].status
+                ? _panHandler
+                : null,
         child: Transform.rotate(
-          angle: (_vxClass.myDevices[1] as FanItem).knobvalue!,
+          angle: RoomListData
+              .roomData![roomIndex].devicesData![deviceIndex].knobvalue!,
           // degree * (pi / 180),
           child: ControlKnob(
               // knobReading: widget.knobReading,

@@ -189,7 +189,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                   ? null
                   : () {
                       // navigate to room name page
-                      // Navigator.pushNamed(context, MyRoutes.homeRoute);
+                      Navigator.pushNamed(context, MyRoutes.roomSetupRoute);
                     },
               child: "Continue".text.make(),
             ),

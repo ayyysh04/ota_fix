@@ -1,16 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ota_fix/core/store.dart';
-import 'package:ota_fix/model/fanItem_model.dart';
-import 'package:ota_fix/screen/fan_screen.dart';
+import 'package:ota_fix/model/room_model.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+import 'package:ota_fix/core/store.dart';
+import 'package:ota_fix/model/device_model.dart';
+import 'package:ota_fix/model/fanItem_model.dart';
+import 'package:ota_fix/screen/fan_screen.dart';
+
 class OnOffWidget extends StatefulWidget {
+  final int roomIndex;
   const OnOffWidget({
     Key? key,
-    @required this.fanItem,
+    required this.roomIndex,
+    required this.deviceIndex,
   }) : super(key: key);
-  final FanItem? fanItem;
+  final int deviceIndex;
 
   @override
   _OnOffWidgetState createState() => _OnOffWidgetState();
@@ -23,7 +28,8 @@ class _OnOffWidgetState extends State<OnOffWidget> {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.0),
-        color: getBackColor(widget.fanItem!.speed),
+        color: getBackColor(RoomListData.roomData![widget.roomIndex]
+            .devicesData![widget.deviceIndex].speed!),
       ),
       height: 100,
       width: MediaQuery.of(context).size.width * 0.8,
@@ -47,7 +53,8 @@ class _OnOffWidgetState extends State<OnOffWidget> {
                     'OFF',
                     style: TextStyle(
                         fontSize: 16,
-                        color: !widget.fanItem!.active!
+                        color: RoomListData.roomData![widget.roomIndex]
+                                .devicesData![widget.deviceIndex].status
                             ? Colors.white
                             : Colors.white.withOpacity(0.3)),
                   ),
@@ -57,21 +64,28 @@ class _OnOffWidgetState extends State<OnOffWidget> {
                   Text('ON',
                       style: TextStyle(
                           fontSize: 16,
-                          color: widget.fanItem!.active!
+                          color: RoomListData.roomData![widget.roomIndex]
+                                  .devicesData![widget.deviceIndex].status
                               ? Colors.white
                               : Colors.white.withOpacity(0.3))),
                 ],
               ),
               CupertinoSwitch(
-                activeColor: widget.fanItem!.active!
+                activeColor: RoomListData.roomData![widget.roomIndex]
+                        .devicesData![widget.deviceIndex].status
                     ? Colors.white54
                     : Colors.white.withOpacity(0.2),
-                trackColor: widget.fanItem!.active!
+                trackColor: RoomListData.roomData![widget.roomIndex]
+                        .devicesData![widget.deviceIndex].status
                     ? Colors.white54
                     : Colors.white.withOpacity(0.1),
-                value: widget.fanItem!.active!,
+                value: RoomListData.roomData![widget.roomIndex]
+                    .devicesData![widget.deviceIndex].status,
                 onChanged: (value) {
-                  ChangeStatus(value);
+                  ChangeStatus(
+                      deviceStatus: value,
+                      deviceIndex: widget.deviceIndex,
+                      roomIndex: widget.roomIndex);
                 },
               ),
             ],

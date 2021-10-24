@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:ota_fix/model/device_model.dart';
 import 'package:ota_fix/model/fanItem_model.dart';
+import 'package:ota_fix/model/room_model.dart';
 import 'package:ota_fix/screen/fan_screen.dart';
 
 class TemperatureWidget extends StatefulWidget {
+  final int roomIndex;
+  final int deviceIndex;
   const TemperatureWidget({
+    required this.deviceIndex,
     Key? key,
-    @required this.fanItem,
+    required this.roomIndex,
     @required this.onChanged,
   }) : super(key: key);
-  final FanItem? fanItem;
   final Function(double)? onChanged;
 
   @override
@@ -22,7 +26,8 @@ class _TemperatureWidgetState extends State<TemperatureWidget> {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.0),
-        color: getBackColor(widget.fanItem!.knobvalue!),
+        color: getBackColor(RoomListData.roomData![widget.roomIndex]
+            .devicesData![widget.deviceIndex].knobvalue!),
       ),
       // height: 100,
       width: MediaQuery.of(context).size.width,
@@ -48,7 +53,8 @@ class _TemperatureWidgetState extends State<TemperatureWidget> {
                 child: Slider(
                   min: 16,
                   max: 30,
-                  value: widget.fanItem!.knobvalue!,
+                  value: RoomListData.roomData![widget.roomIndex]
+                      .devicesData![widget.deviceIndex].knobvalue!,
                   activeColor: Colors.white,
                   inactiveColor: Colors.white.withOpacity(0.2),
                   onChanged: (value) {

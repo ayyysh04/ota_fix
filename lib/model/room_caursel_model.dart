@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 
-class RoomListData {
+class RoomCaurselModel {
   Image roomImage;
-  String roomName;
-  RoomListData({
+  String roomtype;
+  RoomCaurselModel({
     required this.roomImage,
-    required this.roomName,
+    required this.roomtype,
   });
 }
