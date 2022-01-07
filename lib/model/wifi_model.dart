@@ -13,9 +13,9 @@ class WifiModel {
   });
 
   factory WifiModel.fromMap(Map<String, dynamic> map) {
-    if (map.isEmpty || map["Devices"] == null) return WifiModel(devices: null);
+    if (map.isEmpty || map["Wifi"] == null) return WifiModel(devices: null);
     return WifiModel(
-      devices: List<Device>.from(map['Devices']?.map((x) => Device.fromMap(x))),
+      devices: List<Device>.from(map['Wifi']?.map((x) => Device.fromMap(x))),
     );
   }
 

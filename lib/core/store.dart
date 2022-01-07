@@ -6,7 +6,7 @@ import 'package:ota_fix/Utils/themes.dart';
 //I.e all the class objects are made here and accessed to the Vxstore
 class Mystore extends VxStore {
   String tempDeviceID = "";
-  int noOfRoom = 0;
+  // int noOfRoom = 0;
   MyTheme? themeMode;
   //constructor ,We can also define them initially like done in above comments too
   Mystore() {

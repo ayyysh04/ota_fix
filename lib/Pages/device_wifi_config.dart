@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:ota_fix/Pages/login_page.dart';
 import 'package:ota_fix/Utils/routes.dart';
 import 'package:ota_fix/model/wifi_model.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -17,7 +20,7 @@ class DeviceConfig extends StatefulWidget {
 class _DeviceConfigState extends State<DeviceConfig> {
   bool _isdisable = true;
   String? _password;
-  Future<Map>? _wifiData;
+  Future<WifiModel?>? _wifiData;
   // WifiModel? wifiData;
   @override
   void initState() {
@@ -25,26 +28,31 @@ class _DeviceConfigState extends State<DeviceConfig> {
     _wifiData = _getWifiData();
   }
 
-  Future<Map> _getWifiData() async {
-    // var url = Uri.parse('https://192.168.4.1/scan');
-    // var response = await http.post(url);
-    // print('Response status: ${response.statusCode}');
+  Future<WifiModel?> _getWifiData() async {
+    var response;
+    var response2;
+    try {
+      response = await http.get(Uri.parse('http://192.168.4.1/scan'));
+    } on SocketException catch (e) {
+      print(e);
+    }
+    WifiModel? wifiData;
+    print('Response status: ${response2?.statusCode}');
+    if (response?.statusCode == 200)
+      wifiData = WifiModel.fromJson(response.body);
 
-    // response = await http.get(url);
-
-    // wifiData= WifiModel.fromJson(response.body);
     //dummy Data
-    Map<String, dynamic> datain = {
-      "Devices": [
-        {"ssid": "Anita", "rssi": "-40", "security": "8"},
-        {"ssid": "nita", "rssi": "-0", "security": "5"},
-        {"ssid": "ta", "rssi": "-90", "security": "1"},
-        {"ssid": "tata", "rssi": "-90", "security": "7"},
-      ]
-    };
+    // Map<String, dynamic> datain = {
+    //   "Devices": [
+    //     {"ssid": "Anita", "rssi": "-40", "security": "8"},
+    //     {"ssid": "nita", "rssi": "-0", "security": "5"},
+    //     {"ssid": "ta", "rssi": "-90", "security": "1"},
+    //     {"ssid": "tata", "rssi": "-90", "security": "7"},
+    //   ]
+    // };
     // wifiData = WifiModel.fromMap(datain);
-    await Future.delayed(Duration(seconds: 5));
-    return datain;
+    // await Future.delayed(Duration(seconds: 5));
+    return wifiData;
   }
 
   @override
@@ -116,13 +124,12 @@ class _DeviceConfigState extends State<DeviceConfig> {
                   setState(() {});
                   return _wifiData!;
                 },
-                child: FutureBuilder(
+                child: FutureBuilder<WifiModel?>(
                   future: _wifiData,
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     if (snapshot.connectionState == ConnectionState.done &&
                         snapshot.hasData) {
-                      WifiModel wifiModelData =
-                          WifiModel.fromMap(snapshot.data);
+                      WifiModel wifiModelData = snapshot.data as WifiModel;
 
                       return ListView.separated(
                           itemBuilder: (context, index) {
@@ -148,7 +155,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                               color: Vx.gray400,
                             );
                           },
-                          itemCount: wifiModelData.devices!.length);
+                          itemCount: wifiModelData.devices?.length ?? 0);
                     } else if (snapshot.connectionState ==
                         ConnectionState.waiting) {
                       return Column(
@@ -276,20 +283,36 @@ class _DeviceConfigState extends State<DeviceConfig> {
                               TextButton(
                                   style: ElevatedButton.styleFrom(
                                       primary: Vx.gray600),
-                                  onPressed: () {
+                                  onPressed: () async {
+                                    Navigator.pop(context);
                                     //use this and send it to the ardiono using http request
                                     // send http request of this wifi to arduino
                                     // if (http_request == device_connected) {
                                     //   isdisable == true;
                                     // }
                                     // eg
-                                    if (_password != null) {
+                                    http.Response? response;
+                                    try {
+                                      response = await http.get(Uri.parse(
+                                          'http://192.168.4.1/setWifi?ssid=$wifiName&pass=$_password'));
+                                      print(response.body);
+                                    } on SocketException catch (e) {
+                                      print(e);
+                                    } on http.ClientException catch (e) {
+                                      print(e);
+                                    }
+                                    if (_password != null &&
+                                        response?.body == "Connected") {
                                       setState(() {
+                                        print(_password);
                                         _isdisable = !_isdisable;
                                       });
                                     }
-                                    //Use vxstore
-                                    Navigator.pop(context);
+
+                                    CustomSnackBar(
+                                        scaffoldContext,
+                                        Text(response?.body ??
+                                            "Cannot reach the Local Server"));
                                     // CreateSwitch(); //implemetn more
                                   },
                                   child: "Connect"

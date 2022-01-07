@@ -1,6 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ota_fix/Utils/Loginpage/snackbar.dart';
+import 'package:ota_fix/model/firebase_auth_utility.dart';
+import 'package:ota_fix/model/firestore_utility.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -21,7 +25,7 @@ class _SignUpState extends State<SignUp> {
   TextEditingController signupPasswordController = TextEditingController();
   TextEditingController signupConfirmPasswordController =
       TextEditingController();
-
+  String? _pass, _username, _emailID;
   @override
   void dispose() {
     focusNodePassword.dispose();
@@ -195,9 +199,6 @@ class _SignUpState extends State<SignUp> {
                                 ),
                               ),
                             ),
-                            onSubmitted: (_) {
-                              _toggleSignUpButton();
-                            },
                             textInputAction: TextInputAction.go,
                           ),
                         ),
@@ -246,7 +247,21 @@ class _SignUpState extends State<SignUp> {
                             fontFamily: 'WorkSansBold'),
                       ),
                     ),
-                    onPressed: () => _toggleSignUpButton(),
+                    onPressed: () async {
+                      if (_emailID != null && _pass != null) {
+                        await FirebaseAuthData.createAccount(
+                            emailId: _emailID!, pass: _pass!, context: context);
+                        FirebaseDatabase.instance
+                            .reference()
+                            .child("users")
+                            .child(FirebaseAuth.instance.currentUser!.uid)
+                            .set("null");
+                      }
+                      await FirestoreUtility.addData(
+                          data: {"name": "gopu"},
+                          collectionPath: "users",
+                          docPath: "ch3NC3D18Re9TuYUJMYcL1j3cqL2");
+                    },
                   ),
                 )
               ],
@@ -255,10 +270,6 @@ class _SignUpState extends State<SignUp> {
         ),
       ),
     );
-  }
-
-  void _toggleSignUpButton() {
-    CustomSnackBar(context, const Text('SignUp button pressed'));
   }
 
   void _toggleSignup() {

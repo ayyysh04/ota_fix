@@ -14,13 +14,14 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Vx.white,
+      color: Colors.white10,
       child: Column(
         children: <Widget>[
           SizedBox(height: 40),
           _profileHeader(),
           Expanded(
             child: ListView(
+              physics: BouncingScrollPhysics(),
               children: <Widget>[
                 GestureDetector(
                   onTap: () async {
@@ -105,7 +106,7 @@ class ProfilePage extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     await FirebaseAuthData.logOut();
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, MyRoutes.loginRoute);
                   },
                   child: _profileListItems(
                       context: context,
@@ -122,88 +123,74 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _profileHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(width: 30),
-        Icon(
-          LineAwesomeIcons.arrow_left,
-          size: 30,
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                height: 100,
-                width: 100,
-                margin: EdgeInsets.only(top: 30),
-                child: Stack(
-                  children: <Widget>[
-                    image == null
-                        ? Container(
-                            clipBehavior: Clip.antiAlias,
-                            child: Icon(
-                              LineAwesomeIcons.user_plus,
-                              size: 50,
-                            ).centered(),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(),
-                              color: Color(0xFFF3F7FB),
-                            ),
-                          )
-                        : CircleAvatar(
-                            radius: 50,
-                            backgroundImage: FileImage(image!),
-                          ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Container(
-                        height: 35,
-                        width: 35,
-                        decoration: BoxDecoration(
-                          color: Vx.black,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          // heightFactor: 10 * 1.5,
-                          // widthFactor: 10 * 1.5,
-                          child: GestureDetector(
-                            onTap: () async {},
-                            child: Icon(
-                              LineAwesomeIcons.pen,
-                              color: Vx.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
+    return Column(
+      children: [
+        Container(
+          height: 100,
+          width: 100,
+          margin: EdgeInsets.only(top: 30),
+          child: Stack(
+            children: <Widget>[
+              image == null
+                  ? Container(
+                      clipBehavior: Clip.antiAlias,
+                      child: Icon(
+                        LineAwesomeIcons.user_plus,
+                        size: 50,
+                      ).centered(),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(),
+                        color: Color(0xFFF3F7FB),
+                      ),
+                    )
+                  : CircleAvatar(
+                      radius: 50,
+                      backgroundImage: FileImage(image!),
+                    ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                    color: Vx.black,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    // heightFactor: 10 * 1.5,
+                    // widthFactor: 10 * 1.5,
+                    child: GestureDetector(
+                      onTap: () async {},
+                      child: Icon(
+                        LineAwesomeIcons.pen,
+                        color: Vx.white,
+                        size: 20,
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-              SizedBox(height: 20),
-              Text(
-                "Default User",
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 5),
-              Text(
-                "ayushiit2003@gmail.com",
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-              SizedBox(height: 20),
             ],
           ),
         ),
-        SizedBox(width: 50),
+        SizedBox(height: 20),
+        Text(
+          "Default User",
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: 5),
+        Text(
+          "ayushiit2003@gmail.com",
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w300,
+          ),
+        ),
+        SizedBox(height: 20),
       ],
     );
   }

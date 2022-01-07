@@ -13,7 +13,7 @@ class DeviceModel {
   String devicetype;
   bool status;
   int switchno;
-
+  int pos;
   int? speed; //for fan only
   double? knobvalue; //data from local storage only
   DeviceModel(
@@ -23,11 +23,12 @@ class DeviceModel {
       required this.status,
       required this.switchno,
       this.speed,
-      this.knobvalue //data from local storage only
-      });
+      this.knobvalue, //data from local storage only
+      required this.pos});
 
   Map<String, dynamic> toMapLight() {
     return {
+      'pos': pos,
       'device name': devicename,
       'device type': devicetype,
       'status': status,
@@ -49,6 +50,7 @@ class DeviceModel {
 
   Map<String, dynamic> toMapFan() {
     return {
+      'pos': pos,
       'device name': devicename,
       'device type': devicetype,
       'status': status,
@@ -59,12 +61,13 @@ class DeviceModel {
 
   factory DeviceModel.fromSnapshot(DataSnapshot snap) {
     return DeviceModel(
+      pos: snap.value['pos'],
       devicename: snap.value['device name'],
       devicetype: snap.value['device type'],
       status: snap.value['status'],
       switchno: snap.value['switch no'].toInt(),
       key: snap.key ??
-          "null", //just avoid thte null ,in our database a key will always be there
+          "null", //just avoid thte null ,in our database a key will always be there so it cant be null
       speed: snap.value['speed'] ?? null,
       knobvalue:
           snap.value['speed'] != null ? snap.value['speed'] * (pi / 4) : null,
@@ -75,7 +78,7 @@ class DeviceModel {
 // class DeviceData {
 //   static List<DeviceModel>? devicesList;
 // }
-
+//callbacks
 class OnEntryAdded extends VxMutation<Mystore> {
   int roomIndex;
   Event event;
@@ -111,6 +114,23 @@ class OnEntryChanged extends VxMutation<Mystore> {
     RoomListData.roomData![roomIndex].devicesData![
             RoomListData.roomData![roomIndex].devicesData!.indexOf(oldEntry)] =
         DeviceModel.fromSnapshot(event.snapshot);
+  }
+}
+
+class OnEntryRemoved extends VxMutation<Mystore> {
+  int roomIndex;
+  Event event;
+  OnEntryRemoved({
+    required this.roomIndex,
+    required this.event,
+  });
+  @override
+  perform() {
+    print("Entry removed");
+
+    RoomListData.roomData![roomIndex].devicesData!.removeWhere((entry) {
+      return entry.key == event.snapshot.key;
+    });
   }
 }
 

@@ -13,7 +13,7 @@ class AddRoom extends VxMutation<Mystore> {
   AddRoom(this.roomName);
   @override
   perform() {
-    store!.noOfRoom = store!.noOfRoom++;
+    // store!.noOfRoom = store!.noOfRoom++;
     //firebase add room
   }
 }

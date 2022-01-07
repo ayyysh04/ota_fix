@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -23,40 +24,55 @@ class SwitchesPage extends StatefulWidget {
 }
 
 class _SwitchesPageState extends State<SwitchesPage> {
-  String? _deviceName = "opop";
+  var _gridViewHeight, _gridViewWidth;
+  late ScrollController _scrollController;
+
   bool _showbottomRemoveBar = false;
-  String? _deviceType;
-  int? _switchno;
+
+  double? width;
+  double? height;
+  int? pos;
+  var _isDragStart = false;
   final _formKey = GlobalKey<FormState>();
   StreamSubscription<Event>? devicesDataAddSubscription;
   StreamSubscription<Event>? devicesDataChangeSubscription;
+  StreamSubscription<Event>? devicesDataRemoveSubscription;
+  _moveUp() {
+    _scrollController.animateTo(_scrollController.offset - _gridViewHeight,
+        curve: Curves.linear, duration: Duration(milliseconds: 500));
+  }
+
+  _moveDown() {
+    _scrollController.animateTo(_scrollController.offset + _gridViewHeight,
+        curve: Curves.linear, duration: Duration(milliseconds: 500));
+  }
+
   @override
   void initState() {
-    Query _devicesDataAddQuery = FirebaseDatabase.instance
+    _scrollController = ScrollController();
+    Query _devicesDataQuery = FirebaseDatabase.instance
         .reference()
         .child("users")
         .child(FirebaseAuthData.auth.currentUser!.uid)
         .child("rooms")
         .child(roomModel.RoomListData.roomData![widget.roomIndex].roomID)
-        .child("Devices");
-    Query _devicesDataChangeQuery = FirebaseDatabase.instance
-        .reference()
-        .child("users")
-        .child(FirebaseAuthData.auth.currentUser!.uid)
-        .child("rooms")
-        .child(roomModel.RoomListData.roomData![widget.roomIndex].roomID)
-        .child("Devices");
+        .child("Devices")
+        .orderByChild("pos");
+
     roomModel.RoomListData.roomData![widget.roomIndex].devicesData =
         []; //resets the device list when we open devices page
-    devicesDataAddSubscription =
-        _devicesDataAddQuery.onChildAdded.listen((event) {
+    devicesDataAddSubscription = _devicesDataQuery.onChildAdded.listen((event) {
       deviceModel.OnEntryAdded(event: event, roomIndex: widget.roomIndex);
-
-      devicesDataChangeSubscription =
-          _devicesDataChangeQuery.onChildChanged.listen((event) {
-        deviceModel.OnEntryChanged(event: event, roomIndex: widget.roomIndex);
-      });
     });
+    devicesDataChangeSubscription =
+        _devicesDataQuery.onChildChanged.listen((event) {
+      deviceModel.OnEntryChanged(event: event, roomIndex: widget.roomIndex);
+    });
+    devicesDataRemoveSubscription =
+        _devicesDataQuery.onChildRemoved.listen((event) {
+      deviceModel.OnEntryRemoved(event: event, roomIndex: widget.roomIndex);
+    });
+
     super.initState();
   }
 
@@ -64,6 +80,7 @@ class _SwitchesPageState extends State<SwitchesPage> {
   void dispose() {
     devicesDataAddSubscription?.cancel();
     devicesDataChangeSubscription?.cancel();
+    devicesDataRemoveSubscription?.cancel();
     super.dispose();
   }
 
@@ -94,8 +111,8 @@ class _SwitchesPageState extends State<SwitchesPage> {
               primary: Vx.gray400,
               // onPrimary: Colors.red,
             ),
-            onPressed: () {
-              customModalBottomSheet(context);
+            onPressed: () async {
+              await customModalBottomSheet(context);
             },
             child: Icon(Icons.add),
           ).pOnly(right: 10),
@@ -107,74 +124,389 @@ class _SwitchesPageState extends State<SwitchesPage> {
             child: Column(
               children: [
                 Flexible(
-                  flex: 8,
-                  child: GestureDetector(
-                    onTap: () {
-                      if (_showbottomRemoveBar == true)
-                        setState(() {
-                          _showbottomRemoveBar = false;
-                        });
-                    },
-                    child: Container(
-                      child: GridView.builder(
-                        // dragStartBehavior: DragStartBehavior.start,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          childAspectRatio: 0.9,
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                        ),
-                        itemCount: roomModel.RoomListData
-                            .roomData![widget.roomIndex].devicesData!.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return LongPressDraggable(
-                            maxSimultaneousDrags: 1,
-                            onDragStarted: () {
-                              setState(() {
-                                _showbottomRemoveBar = true;
-                              });
-                            },
-                            child: GestureDetector(
-                              child: _gridItem(index, context),
-                              onTap: () {
-                                if (roomModel
-                                        .RoomListData
-                                        .roomData![widget.roomIndex]
-                                        .devicesData![index]
-                                        .devicetype ==
-                                    "Fan") {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => FanScreen(
-                                              roomIndex: widget.roomIndex,
-                                              deviceIndex: index)));
-                                }
-                              },
-                            ),
-                            data: index, //dragged item index
-                            feedbackOffset: Offset(0, 0),
-                            feedback: _gridItem(index, context),
-                          );
+                    flex: 8,
+                    child: GestureDetector(
+                        onTap: () {
+                          if (_showbottomRemoveBar == true)
+                            setState(() {
+                              _showbottomRemoveBar = false;
+                            });
                         },
-                      ),
-                    )
-                        // .hPCT(context: context, heightPCT: 70)
-                        .pOnly(left: 20, right: 20, top: 10),
-                  ),
-                ),
+                        child: Container(
+                          child: Stack(children: [
+                            LayoutBuilder(builder: (context, constraints) {
+                              _gridViewHeight = constraints.maxHeight;
+                              _gridViewWidth = constraints.maxWidth;
+                              return ScrollConfiguration(
+                                behavior: const ScrollBehavior()
+                                    .copyWith(overscroll: false),
+                                child: GridView.builder(
+                                        // physics: BouncingScrollPhysics(),
+                                        controller: _scrollController,
+                                        // dragStartBehavior: DragStartBehavior.start,
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                          childAspectRatio: 0.9,
+                                          crossAxisCount: 2,
+                                          crossAxisSpacing: 10,
+                                          mainAxisSpacing: 10,
+                                        ),
+                                        itemCount: roomModel
+                                            .RoomListData
+                                            .roomData![widget.roomIndex]
+                                            .devicesData!
+                                            .length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return LayoutBuilder(builder:
+                                              (BuildContext context,
+                                                  BoxConstraints constraints) {
+                                            height = constraints.minHeight;
+                                            width = constraints.minWidth;
+                                            return DragTarget(
+                                              builder: (context, candidateData,
+                                                  rejectedData) {
+                                                return LongPressDraggable(
+                                                  data: roomModel
+                                                      .RoomListData
+                                                      .roomData![
+                                                          widget.roomIndex]
+                                                      .devicesData?[index]
+                                                      .key,
+                                                  maxSimultaneousDrags: 1,
+                                                  child: Opacity(
+                                                      opacity: pos != null
+                                                          ? pos == index
+                                                              ? 0.6
+                                                              : 1
+                                                          : 1,
+                                                      child: GestureDetector(
+                                                        child: _gridItem(
+                                                            index, context),
+                                                        onTap: () {
+                                                          if (roomModel
+                                                                  .RoomListData
+                                                                  .roomData![widget
+                                                                      .roomIndex]
+                                                                  .devicesData![
+                                                                      index]
+                                                                  .devicetype ==
+                                                              "Fan") {
+                                                            Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                    builder: (context) => FanScreen(
+                                                                        roomIndex:
+                                                                            widget
+                                                                                .roomIndex,
+                                                                        deviceIndex:
+                                                                            index)));
+                                                          }
+                                                        },
+                                                      )),
+                                                  feedbackOffset: Offset(0, 0),
+                                                  feedback:
+                                                      _gridItem(index, context),
+                                                  axis: null,
+                                                  onDragEnd: (_) {
+                                                    pos = null;
+                                                    print("drag end");
+                                                    setState(() {
+                                                      _isDragStart = false;
+                                                      _showbottomRemoveBar =
+                                                          false;
+                                                    });
+                                                  },
+                                                  onDragStarted: () {
+                                                    print("drag started");
+                                                    setState(() {
+                                                      _isDragStart = true;
+                                                      _showbottomRemoveBar =
+                                                          true;
+                                                    });
+                                                  },
+                                                  onDragCompleted: () {
+                                                    print("drag completed");
+
+                                                    setState(() {
+                                                      _isDragStart = false;
+                                                    });
+                                                  },
+                                                );
+                                              },
+                                              onWillAccept: (String? data) {
+                                                if (data != null) {
+                                                  int newIndex = index;
+
+                                                  int indexOfFirstItem =
+                                                      roomModel
+                                                          .RoomListData
+                                                          .roomData![
+                                                              widget.roomIndex]
+                                                          .devicesData!
+                                                          .indexOf(roomModel
+                                                              .RoomListData
+                                                              .roomData![widget
+                                                                  .roomIndex]
+                                                              .devicesData!
+                                                              .firstWhere(
+                                                                  (element) {
+                                                    if (element.key == data)
+                                                      return true;
+                                                    return false;
+                                                  }));
+                                                  int indexOfSecondItem = index;
+                                                  if (indexOfSecondItem !=
+                                                      indexOfFirstItem) {
+                                                    if (indexOfFirstItem >
+                                                        indexOfSecondItem) {
+                                                      for (int i =
+                                                              indexOfFirstItem;
+                                                          i > indexOfSecondItem;
+                                                          i--) {
+                                                        var tmpPos = roomModel
+                                                            .RoomListData
+                                                            .roomData![widget
+                                                                .roomIndex]
+                                                            .devicesData![i - 1]
+                                                            .pos;
+                                                        var tmp = roomModel
+                                                            .RoomListData
+                                                            .roomData![widget
+                                                                .roomIndex]
+                                                            .devicesData![i - 1];
+                                                        roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![i - 1]
+                                                                .pos =
+                                                            roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![i]
+                                                                .pos;
+                                                        roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![i - 1] =
+                                                            roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![i];
+                                                        roomModel
+                                                            .RoomListData
+                                                            .roomData![widget
+                                                                .roomIndex]
+                                                            .devicesData![i]
+                                                            .pos = tmpPos;
+                                                        roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![
+                                                            i] = tmp;
+                                                      }
+                                                    } else {
+                                                      for (int i =
+                                                              indexOfFirstItem;
+                                                          i < indexOfSecondItem;
+                                                          i++) {
+                                                        var tmpPos = roomModel
+                                                            .RoomListData
+                                                            .roomData![widget
+                                                                .roomIndex]
+                                                            .devicesData![i + 1]
+                                                            .pos;
+                                                        var tmp = roomModel
+                                                            .RoomListData
+                                                            .roomData![widget
+                                                                .roomIndex]
+                                                            .devicesData![i + 1];
+                                                        roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![i + 1]
+                                                                .pos =
+                                                            roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![i]
+                                                                .pos;
+                                                        roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![i + 1] =
+                                                            roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![i];
+                                                        roomModel
+                                                            .RoomListData
+                                                            .roomData![widget
+                                                                .roomIndex]
+                                                            .devicesData![i]
+                                                            .pos = tmpPos;
+                                                        roomModel
+                                                                .RoomListData
+                                                                .roomData![widget
+                                                                    .roomIndex]
+                                                                .devicesData![
+                                                            i] = tmp;
+                                                      }
+                                                    }
+                                                  }
+                                                  setState(
+                                                    () {
+                                                      pos = newIndex;
+                                                    },
+                                                  );
+                                                  return true;
+                                                }
+
+                                                return false;
+                                              },
+                                              onAccept: (String data) {
+                                                Map<String, dynamic> mapData =
+                                                    Map<String,
+                                                        dynamic>.fromIterable(
+                                                  roomModel
+                                                      .RoomListData
+                                                      .roomData![
+                                                          widget.roomIndex]
+                                                      .devicesData!,
+                                                  key: (e) => (e as deviceModel
+                                                          .DeviceModel)
+                                                      .key!,
+                                                  value: (e) {
+                                                    if (e.devicetype == "Fan") {
+                                                      return {
+                                                        'pos': e.pos,
+                                                        'device name':
+                                                            e.devicename,
+                                                        'device type':
+                                                            e.devicetype,
+                                                        'status': e.status,
+                                                        'switch no': e.switchno,
+                                                        'speed': e.speed,
+                                                      };
+                                                    } else {
+                                                      return {
+                                                        'pos': e.pos,
+                                                        'device name':
+                                                            e.devicename,
+                                                        'device type':
+                                                            e.devicetype,
+                                                        'status': e.status,
+                                                        'switch no': e.switchno,
+                                                      };
+                                                    }
+                                                  },
+                                                );
+                                                FirebaseDatabase.instance
+                                                    .reference()
+                                                    .child("users")
+                                                    .child(FirebaseAuthData
+                                                        .auth.currentUser!.uid)
+                                                    .child("rooms")
+                                                    .child(roomModel
+                                                        .RoomListData
+                                                        .roomData![
+                                                            widget.roomIndex]
+                                                        .roomID)
+                                                    .child("Devices")
+                                                    .update(mapData);
+                                                // print(mapData);
+
+                                                setState(
+                                                  () {
+                                                    pos = null;
+                                                  },
+                                                );
+                                              },
+                                            );
+                                          });
+                                        })
+                                    // .hPCT(context: context, heightPCT: 70)
+                                    .pOnly(left: 20, right: 20, top: 10),
+                              );
+                            }),
+                            Visibility(
+                              visible: _isDragStart,
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: DragTarget(
+                                  builder: (context,
+                                          List<String?> candidateData,
+                                          rejectedData) =>
+                                      Container(
+                                    height: 20,
+                                    width: double.infinity,
+                                    color: Colors.transparent,
+                                  ),
+                                  onWillAccept: (_) {
+                                    _moveUp();
+                                    return false;
+                                  },
+                                ),
+                              ),
+                            ),
+                            Visibility(
+                              visible: _isDragStart,
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: DragTarget(
+                                  builder: (context,
+                                          List<String?> candidateData,
+                                          rejectedData) =>
+                                      Container(
+                                    height: 20,
+                                    width: double.infinity,
+                                    color: Colors.transparent,
+                                  ),
+                                  onWillAccept: (_) {
+                                    _moveDown();
+                                    return false;
+                                  },
+                                ),
+                              ),
+                            ),
+                          ]),
+                        ))),
                 Flexible(
                   flex: 1,
                   child: SizedBox.expand(
                     child: _showbottomRemoveBar
                         ? DragTarget(
                             onAccept: (data) //when onwillaccept returns true
-                                {
-                              print("accepted");
-                            },
-                            onWillAccept: (data) //Whether to accept or not
-                                {
-                              return false;
+                                async {
+                              await FirebaseDatabase.instance
+                                  .reference()
+                                  .child("users")
+                                  .child(FirebaseAuthData.auth.currentUser!.uid)
+                                  .child("rooms")
+                                  .child(roomModel.RoomListData
+                                      .roomData![widget.roomIndex].roomID)
+                                  .child("Devices")
+                                  .child(data! as String)
+                                  .remove()
+                                  .whenComplete(() {
+                                roomModel.RoomListData
+                                    .roomData![widget.roomIndex].devicesData!
+                                    .removeWhere((element) {
+                                  if (element.key == data as String) {
+                                    return true;
+                                  }
+                                  return false;
+                                });
+                              });
                             },
                             onLeave: (data) //when onwillaccept returns false
                                 {
@@ -206,7 +538,16 @@ class _SwitchesPageState extends State<SwitchesPage> {
                                 flex: 5,
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(30),
-                                  onTap: () {},
+                                  onTap: () {
+                                    roomModel.RoomListData
+                                        .roomData![widget.roomIndex].devicesData
+                                        ?.forEachIndexed((index, element) {
+                                      deviceModel.ChangeStatus(
+                                          roomIndex: widget.roomIndex,
+                                          deviceIndex: index,
+                                          deviceStatus: true);
+                                    });
+                                  },
                                   child: Ink(
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(30),
@@ -225,7 +566,16 @@ class _SwitchesPageState extends State<SwitchesPage> {
                                 flex: 5,
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(30),
-                                  onTap: () {},
+                                  onTap: () {
+                                    roomModel.RoomListData
+                                        .roomData![widget.roomIndex].devicesData
+                                        ?.forEachIndexed((index, element) {
+                                      deviceModel.ChangeStatus(
+                                          roomIndex: widget.roomIndex,
+                                          deviceIndex: index,
+                                          deviceStatus: false);
+                                    });
+                                  },
                                   child: Ink(
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(30),
@@ -251,6 +601,7 @@ class _SwitchesPageState extends State<SwitchesPage> {
         mutations: {
           deviceModel.OnEntryAdded,
           deviceModel.OnEntryChanged,
+          deviceModel.OnEntryRemoved,
           // CreateSwitch
         },
       ),
@@ -259,8 +610,8 @@ class _SwitchesPageState extends State<SwitchesPage> {
 
   _gridItem(int index, BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.40,
-      height: MediaQuery.of(context).size.height * 0.25,
+      width: width,
+      height: height,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
         // margin: EdgeInsets.all(20),
@@ -295,7 +646,11 @@ class _SwitchesPageState extends State<SwitchesPage> {
     );
   }
 
-  customModalBottomSheet(BuildContext context) {
+  Future customModalBottomSheet(BuildContext context) {
+    FocusNode switchName = FocusNode();
+    String? _deviceName;
+    String? _deviceType;
+    int? _switchno;
     return showModalBottomSheet(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
@@ -307,23 +662,52 @@ class _SwitchesPageState extends State<SwitchesPage> {
         builder: (context) {
           return StatefulBuilder(
             builder: (BuildContext context,
-                void Function(void Function()) setState) {
+                void Function(void Function()) setStateModal) {
               return Container(
                   child: Form(
-                key: _formKey,
+                // key: _formKey,
                 child: Container(
                   child: DropdownButtonHideUnderline(
                     child: Column(
+                      // mainAxisSize: MainAxisSize.max,
                       children: [
+                        5.heightBox,
                         "New Button Config".text.xl3.bold.make(),
-                        20.heightBox,
+                        10.heightBox,
                         Icon(
                           (_deviceType == "Fan")
                               ? FontAwesomeIcons.fan
                               : Icons.lightbulb_rounded,
                           size: 120,
                         ),
-                        20.heightBox,
+                        10.heightBox,
+                        TextFormField(
+                          focusNode: switchName,
+                          decoration: InputDecoration(
+                            labelText: "Enter Switch Name",
+                            fillColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide: BorderSide(
+                                color: Colors.blue,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide: BorderSide(
+                                color: Vx.gray400,
+                                width: 2.0,
+                              ),
+                            ),
+                          ),
+                          onFieldSubmitted: (val) {
+                            switchName.unfocus();
+                          },
+                          onChanged: (value) {
+                            _deviceName = value;
+                          },
+                        ),
+                        10.heightBox,
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           // height: 40.0,
@@ -356,8 +740,11 @@ class _SwitchesPageState extends State<SwitchesPage> {
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500),
                               ),
+                              onTap: () {
+                                switchName.unfocus();
+                              },
                               onChanged: (String? value) {
-                                setState(() {
+                                setStateModal(() {
                                   _deviceType = value;
                                 });
                               }),
@@ -393,8 +780,11 @@ class _SwitchesPageState extends State<SwitchesPage> {
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500),
                               ),
+                              onTap: () {
+                                switchName.unfocus();
+                              },
                               onChanged: (value) {
-                                setState(() {
+                                setStateModal(() {
                                   _switchno = value;
                                 });
                               }),
@@ -404,9 +794,22 @@ class _SwitchesPageState extends State<SwitchesPage> {
                             style:
                                 ElevatedButton.styleFrom(primary: Vx.gray600),
                             onPressed: () {
-                              //Use vxstore
+                              int sortPos = 0;
+                              if (roomModel
+                                  .RoomListData
+                                  .roomData![widget.roomIndex]
+                                  .devicesData!
+                                  .isNotEmpty) {
+                                sortPos = roomModel.RoomListData
+                                    .roomData![widget.roomIndex].devicesData!
+                                    .reduce((a, b) {
+                                  return a.pos > b.pos ? a : b;
+                                }).pos;
+                              }
+
                               deviceModel.AddNewDevice(
                                   item: deviceModel.DeviceModel(
+                                      pos: sortPos + 1,
                                       devicename: _deviceName!,
                                       devicetype: _deviceType!,
                                       status: false,
@@ -415,11 +818,11 @@ class _SwitchesPageState extends State<SwitchesPage> {
                                       .roomData![widget.roomIndex].roomID);
                               Navigator.pop(context);
                             },
-                            child: "Create".text.xl2.bold.make())
+                            child: "Create".text.xl2.bold.make()),
                       ],
                     ),
                   ),
-                ).pSymmetric(v: 20, h: 20),
+                ).pSymmetric(v: 0, h: 20),
               ));
             },
           );

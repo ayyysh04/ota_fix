@@ -170,111 +170,114 @@ class _AllUsersPageState extends State<AllUsersPage> {
                   ),
                   Container(
                     height: MediaQuery.of(context).size.height * 0.60,
-                    child: ListView.separated(
-                      itemCount: AllUserIDData.allUserIdData!.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        UserDataModel? _userData =
-                            AllUserIDData.allUserIdData![index].userModel;
-                        return Container //we can use dissmisble here
-                            (
-                          // color: Vx.amber100,
-                          // height: 120,
-                          child: Row(
-                            children: [
-                              Container(
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(15)),
-                                      color: Vx.gray200),
-                                  clipBehavior: Clip.antiAlias,
-                                  child: Icon(
-                                    LineAwesomeIcons.user,
-                                    size: 100,
-                                  )),
-                              15.widthBox,
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  (_userData == null
-                                          ? "not set"
-                                          : _userData.name)
-                                      .toString()
-                                      .text
-                                      .lg
-                                      .bold
-                                      .make(),
-                                  10.heightBox,
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Visibility(
-                                        visible: AllUserIDData
-                                            .allUserIdData![index].isActive,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            border:
-                                                Border.all(color: Vx.green400),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5)),
-                                            color: Vx.green200,
+                    child: ScrollConfiguration(
+                      behavior: ScrollBehavior().copyWith(overscroll: false),
+                      child: ListView.separated(
+                        itemCount: AllUserIDData.allUserIdData!.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          UserDataModel? _userData =
+                              AllUserIDData.allUserIdData![index].userModel;
+                          return Container //we can use dissmisble here
+                              (
+                            // color: Vx.amber100,
+                            // height: 120,
+                            child: Row(
+                              children: [
+                                Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15)),
+                                        color: Vx.gray200),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: Icon(
+                                      LineAwesomeIcons.user,
+                                      size: 100,
+                                    )),
+                                15.widthBox,
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    (_userData == null
+                                            ? "not set"
+                                            : _userData.name)
+                                        .toString()
+                                        .text
+                                        .lg
+                                        .bold
+                                        .make(),
+                                    10.heightBox,
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Visibility(
+                                          visible: AllUserIDData
+                                              .allUserIdData![index].isActive,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Vx.green400),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(5)),
+                                              color: Vx.green200,
+                                            ),
+                                            child: "Active User"
+                                                .text
+                                                .color(Vx.green600)
+                                                .make()
+                                                .pSymmetric(h: 10, v: 5),
                                           ),
-                                          child: "Active User"
-                                              .text
-                                              .color(Vx.green600)
-                                              .make()
-                                              .pSymmetric(h: 10, v: 5),
                                         ),
-                                      ),
-                                      10.widthBox,
-                                      Visibility(
-                                        visible: AllUserIDData
-                                            .allUserIdData![index].isAdmin,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            border:
-                                                Border.all(color: Vx.red400),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5)),
-                                            color: Vx.red200,
+                                        10.widthBox,
+                                        Visibility(
+                                          visible: AllUserIDData
+                                              .allUserIdData![index].isAdmin,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border:
+                                                  Border.all(color: Vx.red400),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(5)),
+                                              color: Vx.red200,
+                                            ),
+                                            child: "Admin"
+                                                .text
+                                                .color(Vx.red500)
+                                                .make()
+                                                .pSymmetric(h: 10, v: 5),
                                           ),
-                                          child: "Admin"
+                                        ),
+                                      ],
+                                    ),
+                                    10.heightBox,
+                                    MaterialButton(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 0, vertical: 10),
+                                      onPressed: () {},
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.delete_outline_rounded,
+                                            color: Vx.red500,
+                                          ),
+                                          "Remove User"
                                               .text
                                               .color(Vx.red500)
                                               .make()
-                                              .pSymmetric(h: 10, v: 5),
-                                        ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  10.heightBox,
-                                  MaterialButton(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 0, vertical: 10),
-                                    onPressed: () {},
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.delete_outline_rounded,
-                                          color: Vx.red500,
-                                        ),
-                                        "Remove User"
-                                            .text
-                                            .color(Vx.red500)
-                                            .make()
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        return 20.heightBox;
-                      },
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                        separatorBuilder: (BuildContext context, int index) {
+                          return 20.heightBox;
+                        },
+                      ),
                     ),
                   ),
                   Spacer(

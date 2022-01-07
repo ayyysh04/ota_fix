@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/retry.dart';
 import 'package:ota_fix/Utils/routes.dart';
 import 'package:ota_fix/Widgets/custom_bottom_navbar.dart';
 import 'package:ota_fix/core/store.dart';
@@ -31,8 +32,8 @@ class _HomePageState extends State<HomePage> {
   int _currentPage = 0;
   // late StreamSubscription<Event> userIdDataAddSubscription;
   // late StreamSubscription<Event> userRoomDataChangeSubscription;
-  late StreamSubscription<Event> userDeviceDataAddSubscription;
-  late StreamSubscription<Event> userDeviceDataChangeSubscription;
+  // late StreamSubscription<Event> userDeviceDataAddSubscription;
+  // late StreamSubscription<Event> userDeviceDataChangeSubscription;
   late StreamSubscription<Event> roomDataAddSubscription;
   @override
   void initState() {
@@ -108,8 +109,8 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     // userIdDataAddSubscription.cancel();
     // userRoomDataChangeSubscription.cancel();
-    userDeviceDataAddSubscription.cancel();
-    userDeviceDataChangeSubscription.cancel();
+    // userDeviceDataAddSubscription.cancel();
+    // userDeviceDataChangeSubscription.cancel();
     roomDataAddSubscription.cancel();
     super.dispose();
   }
@@ -123,13 +124,14 @@ class _HomePageState extends State<HomePage> {
   void _onItemTapped(int index) {
     setState(() {
       _currentPage = index;
-      pageController.animateToPage(index,
-          duration: Duration(milliseconds: 500), curve: Curves.ease);
+      //   pageController.animateToPage(index,
+      //       duration: Duration(milliseconds: 500), curve: Curves.ease);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
     // deviceModel.DeviceData.devicesList!.forEach((element) {
     //   print(element.devicename);
     //   print(element.devicetype);
@@ -144,20 +146,93 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       // backgroundColor: Colors.transparent,
-      body: PageView(
-        physics: BouncingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        controller: pageController,
-        onPageChanged: (value) {
-          setState(() {
-            _currentPage = value;
-          });
-        },
-        children: [_homepage(), powerUsagePage(), ProfilePage()],
+      body: getBody(),
+      bottomNavigationBar: Container(
+        height: 100,
+        child: Stack(children: [
+          Positioned(
+            bottom: 0,
+            left: 0,
+            child: Container(
+              width: size.width,
+              height: 80,
+              child: Stack(
+                // overflow: Overflow.visible,
+                children: [
+                  CustomPaint(
+                    size: Size(size.width, 80),
+                    painter: BtmNavBarCustomPainter(),
+                  ),
+                  Center(
+                    heightFactor: 0.6,
+                    child: FloatingActionButton(
+                        backgroundColor: Colors.blue,
+                        child: Icon(Icons.mic),
+                        elevation: 0.1,
+                        onPressed: () {}),
+                  ),
+                  Container(
+                    width: size.width,
+                    height: 80,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.home,
+                            color: _currentPage == 0
+                                ? Colors.blue
+                                : Colors.grey.shade400,
+                          ),
+                          onPressed: () {
+                            _onItemTapped(0);
+                          },
+                          splashColor: Colors.white,
+                        ),
+                        IconButton(
+                            icon: Icon(
+                              CupertinoIcons.bolt_fill,
+                              color: _currentPage == 1
+                                  ? Colors.blue
+                                  : Colors.grey.shade400,
+                            ),
+                            onPressed: () {
+                              _onItemTapped(1);
+                            }),
+                        Container(
+                          width: size.width * 0.20,
+                        ),
+                        IconButton(
+                            icon: Icon(
+                              FontAwesomeIcons.solidUser,
+                              color: _currentPage == 2
+                                  ? Colors.blue
+                                  : Colors.grey.shade400,
+                            ),
+                            onPressed: () {
+                              _onItemTapped(2);
+                            }),
+                        IconButton(
+                            icon: Icon(
+                              Icons.notifications,
+                              color: _currentPage == 3
+                                  ? Colors.blue
+                                  : Colors.grey.shade400,
+                            ),
+                            onPressed: () {
+                              _onItemTapped(3);
+                            }),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          )
+        ]),
       ),
-      bottomNavigationBar: CustomBottomNavBar(),
       //  BottomNavigationBar(
-      //   currentIndex: _currentPage,
+      //   _currentPage: _currentPage,
       //   selectedItemColor: Colors.amber[800],
       //   onTap: _onItemTapped,
       //   showSelectedLabels: false,
@@ -185,6 +260,19 @@ class _HomePageState extends State<HomePage> {
       //     ),
       //   ],
       // ),
+    );
+  }
+
+  Widget getBody() {
+    List<Widget> pages = [
+      _homepage(),
+      powerUsagePage(),
+      ProfilePage(),
+      Container()
+    ];
+    return IndexedStack(
+      index: _currentPage,
+      children: pages,
     );
   }
 
@@ -431,9 +519,9 @@ class _HomePageState extends State<HomePage> {
   _upperIconsWidget() {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Vx.blue600, width: 3),
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-      ),
+          // border: Border.all(color: Vx.blue600, width: 3),
+          // borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
       child: Container(
           child: Column(
         children: [
@@ -443,16 +531,17 @@ class _HomePageState extends State<HomePage> {
                   flex: 5,
                   child: Container(
                     decoration: BoxDecoration(
-                        border: Border(
-                      bottom: BorderSide(
-                        color: Vx.blue600,
-                        width: 3.0,
-                      ),
-                      right: BorderSide(
-                        color: Vx.blue600,
-                        width: 3.0,
-                      ),
-                    )),
+                        //   border: Border(
+                        // bottom: BorderSide(
+                        //   color: Vx.blue600,
+                        //   width: 3.0,
+                        // ),
+                        // right: BorderSide(
+                        //   color: Vx.blue600,
+                        //   width: 3.0,
+                        // ),
+                        // )
+                        ),
                     child: Column(
                       children: [
                         Image.asset(
@@ -507,24 +596,25 @@ class _HomePageState extends State<HomePage> {
                 flex: 5,
                 child: Container(
                   decoration: BoxDecoration(
-                      border: Border(
-                    left: BorderSide(
-                      color: Vx.blue600,
-                      width: 3.0,
-                    ),
-                    top: BorderSide(
-                      color: Vx.blue600,
-                      width: 3.0,
-                    ),
-                  )),
+                      //   border: Border(
+                      // left: BorderSide(
+                      //   color: Vx.blue600,
+                      //   width: 3.0,
+                      // ),
+                      // top: BorderSide(
+                      //   color: Vx.blue600,
+                      //   width: 3.0,
+                      // ),
+                      // )
+                      ),
                   child: Column(
                     children: [
                       Image.asset(
                         "assets/icons/humidity.png",
                         height: 100,
                       ),
-                      "Device connected".text.xl.bold.make(),
-                      "4".text.xl.bold.make(),
+                      "Switches on".text.xl.bold.make(),
+                      0.toString().text.xl.bold.make(),
                     ],
                   ),
                 ),
@@ -536,6 +626,16 @@ class _HomePageState extends State<HomePage> {
       // .pOnly(left: 10, right: 10, top: 0, bottom: 10)
       ,
     );
+  }
+
+  int? _noofSwitches() {
+    return roomModel.RoomListData.roomData?.fold<int>(0,
+        (previousValue, element) {
+      return element.devicesData!.fold<int>(0, (previousValue, element) {
+            return (element.status ? 1 : 0) + previousValue;
+          }) +
+          previousValue;
+    });
   }
 }
 

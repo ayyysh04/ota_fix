@@ -3,6 +3,6 @@ import 'package:velocity_x/velocity_x.dart';
 
 powerUsagePage() {
   return Container(
-    color: Vx.amber300,
+    color: Colors.white10,
   );
 }

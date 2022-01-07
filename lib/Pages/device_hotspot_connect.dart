@@ -18,8 +18,8 @@ class WifiConnnectPage extends StatelessWidget {
   final info = NetworkInfo();
   WifiConnnectPage({Key? key}) : super(key: key);
   //These data comming from arduino
-  final String? accessPoint = "ota_fix_hotspot_1234";
-  final String? password = "ayush";
+  final String? accessPoint = "Harshit vai";
+  final String? password = "";
   @override
   Widget build(BuildContext context) {
     connectToWifi();
